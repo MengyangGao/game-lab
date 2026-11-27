@@ -1,34 +1,35 @@
 import * as circuit from './games/circuit.js';
 import {bit, popcount} from './games/common.js';
+import {atmosphere, crystal, entity, floorTiles, isoPoint, position, sceneSvg} from './scene.js';
 
 function draw(level, state, preview, hint) {
   const {lit, edges} = circuit.network(level, state);
-  const at = i => [i % level.n + .5, Math.floor(i / level.n) + .5];
+  const prefix = 'electro';
   const wires = edges.map(([a, b]) => {
-    const [x1, y1] = at(a);
-    const [x2, y2] = at(b);
-    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" />`;
+    const p = isoPoint(level.n, a);
+    const q = isoPoint(level.n, b);
+    return `<line x1="${p.x}" y1="${p.y - 43}" x2="${q.x}" y2="${q.y - 43}" pathLength="1"/>`;
   }).join('');
   const node = (i, kind, index) => {
-    const [x, y] = at(i);
-    const powered = lit.has(i) ? 'powered' : '';
+    const powered = lit.has(i);
     const occupied = index !== undefined && Boolean(state & bit(index));
-    const attrs = `class="circuit-node ${kind} ${powered} ${occupied ? 'conducts' : ''} ${hint?.i === index && index !== undefined ? 'marked' : ''}" style="--x:${x};--y:${y}"`;
-    if (preview || index === undefined) return `<span ${attrs} aria-hidden="true"></span>`;
-    return `<button type="button" ${attrs} data-relay="${index}" aria-pressed="${occupied}" aria-label="第 ${y + .5} 行第 ${x + .5} 列继电支座"></button>`;
+    const content = kind === 'socket' && !occupied ? '' : crystal(prefix, true);
+    const classes = `circuit-node ${kind} ${powered ? 'powered' : ''} ${occupied ? 'conducts' : ''} ${hint?.i === index && index !== undefined ? 'marked' : ''}`;
+    const extra = `data-circuit-kind="${kind}"`;
+    if (preview || index === undefined) return entity(level.n, i, classes, content, kind === 'source' ? '放电石' : '聚电石', extra);
+    return `<button type="button" class="scene-entity ${classes}" style="${position(isoPoint(level.n, i))}" data-relay="${index}" data-circuit-kind="${kind}" aria-pressed="${occupied}" aria-label="${occupied ? '取回此处的继电石' : '在此放置继电石'}">${content}<i class="socket-ring"></i></button>`;
   };
-  return `<div class="board circuit-board" style="--n:${level.n}">
-    <svg class="circuit-wires" viewBox="0 0 ${level.n} ${level.n}" aria-hidden="true">${wires}</svg>
-    ${node(level.source, 'source')}${level.targets.map(i => node(i, 'receiver')).join('')}
-    ${level.sockets.map((i, index) => node(i, 'socket', index)).join('')}
-  </div>${preview ? '' : `<div class="circuit-inventory">继电石余量 <strong>${level.capacity - popcount(state)}</strong><span></span> 已点亮 <strong>${level.targets.filter(i => lit.has(i)).length}/${level.targets.length}</strong></div>`}`;
+  const content = `${floorTiles(level.n, prefix)}<g class="circuit-wires" filter="url(#${prefix}-glow)">${wires}</g>`;
+  return `<div class="circuit-shell"><div class="board scene-board circuit-board" style="--n:${level.n}">${atmosphere(prefix, '#a27de0')}${sceneSvg(prefix, 'electro', content)}${node(level.source, 'source')}${level.targets.map(i => node(i, 'receiver')).join('')}${level.sockets.map((i, index) => node(i, 'socket', index)).join('')}<span class="scene-caption">稻妻 · 导电机关</span></div>${preview ? '' : `<div class="circuit-inventory"><span>继电石</span><strong>${level.capacity - popcount(state)}</strong><small>/ ${level.capacity} 可放置</small><i></i><span>聚电石导通</span><strong>${level.targets.filter(i => lit.has(i)).length} / ${level.targets.length}</strong></div>`}</div>`;
 }
 
 export const circuitGame = {
-  engine: circuit, title: '继电石', english: 'RELAY CIRCUIT', source: '原神', tags: '连通规划',
-  summary: '在石台之间架起电路，点亮所有收束端。',
-  rule: '铜色六边形是电源。点击圆形支座放置或取回继电石。足够近的节点会连通，导通所有菱形收束端即可完成。',
-  tip: '继电石数量有限。先看最远的收束端，再找能同时服务两条支路的位置。',
-  clue: (_, action) => `查看描边的支座。${action ? '这里是下一处应调整的继电石。' : ''}`,
+  engine: circuit, title: '继电石', english: 'RELAY STONE', source: '原神',
+  location: '稻妻 · 导电机关', tags: '电路连接', summary: '布设继电石，将放电石的电流传导至聚电石。',
+  objective: '移动继电石，让放电石放出的电流顺利传导至所有聚电石。',
+  rule: '点击圆形基座放置或取回继电石。距离足够近的放电石、继电石与聚电石会自动连通。',
+  tip: '先观察最远的聚电石。合理的中继位置可以同时连接两条支路，节省有限的继电石。',
+  clue: (_, action) => `调整描边基座上的继电石，观察紫色电流是否向聚电石延伸。`,
+  clear: '电流已顺利传导，所有聚电石均被点亮。',
   draw
 };

@@ -1,4 +1,4 @@
-name: Verify and deploy Puzzle Lab
+name: Verify and deploy Game Lab
 on:
   push:
   pull_request:

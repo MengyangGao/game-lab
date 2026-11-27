@@ -16,7 +16,7 @@ GAMES = {
     "flood": "溢彩画",
     "crate": "庸人的容器",
     "voxel": "枘凿六合·Remake",
-    "mosaic": "梦境拼图",
+    "mosaic": "筑梦拼图",
     "echo": "黄金替罪羊",
     "relay": "熄灯",
     "circuit": "继电石",
@@ -58,6 +58,9 @@ def main():
         shots.mkdir(exist_ok=True)
         for game, path in files.items():
             copyfile(path, shots / f"{game}.png")
+        copyfile(Path(scratch) / "desktop-home.png", shots / "home.png")
+        copyfile(Path(scratch) / "mobile-home.png", shots / "mobile-home.png")
+        copyfile(Path(scratch) / "mobile-mosaic.png", shots / "mobile-mosaic.png")
         gallery = "\n\n".join(
             f"### {title}\n\n![{title}实机截图](docs/screenshots/{game}.png)" for game, title in GAMES.items()
         )

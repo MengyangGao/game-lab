@@ -1,25 +1,42 @@
+import {isoPoint, VIEW_HEIGHT, VIEW_WIDTH} from './scene.js';
+
 const ease = 'cubic-bezier(.22,.76,.28,1)';
 
 export function playMotion(root, level, before, after, action) {
-  const animate = (selector, frames, duration = 230) => root.querySelector(selector)?.animate(frames, {duration, easing: ease});
-  const slide = (selector, from, to) => {
+  const animate = (selector, frames, duration = 260, delay = 0) => root.querySelector(selector)?.animate(frames, {duration, delay, easing: ease, fill: 'backwards'});
+  const slide = (selector, from, to, duration = 245) => {
     if (from === to) return;
+    const token = root.querySelector(selector);
+    if (!token) return;
+    const board = token.closest('.scene-board');
+    if (board) {
+      const start = isoPoint(level.n, from);
+      const end = isoPoint(level.n, to);
+      const rect = board.getBoundingClientRect();
+      const x = (start.x - end.x) / VIEW_WIDTH * rect.width;
+      const y = (start.y - end.y) / VIEW_HEIGHT * rect.height;
+      animate(selector, [
+        {transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`},
+        {transform: 'translate(-50%, -50%)'}
+      ], duration);
+      return;
+    }
     const x = (from % level.n - to % level.n) * 100;
     const y = (Math.floor(from / level.n) - Math.floor(to / level.n)) * 100;
-    animate(selector, [{translate: `${x}% ${y}%`}, {translate: '0% 0%'}], 215);
+    animate(selector, [{translate: `${x}% ${y}%`}, {translate: '0% 0%'}], duration);
   };
   switch (action.type) {
     case 'rotate': {
-      const mirror = level.mirrors[action.i];
-      const turned = after & (1 << action.i) ? 45 : -45;
-      animate(`[data-cell="${mirror}"] .mirror-piece`, [
-        {transform: `rotate(${-turned}deg)`}, {transform: `rotate(${turned}deg)`}
-      ]);
+      animate(`[data-mirror-index="${action.i}"] .mirror-rotor`, [
+        {scale: '.08 1', filter: 'brightness(1.8)'},
+        {scale: '1 1', filter: 'brightness(1)'}
+      ], 390);
+      animate('.beam-core', [{opacity: .25}, {opacity: 1}], 400, 130);
       break;
     }
     case 'fire': {
-      animate('.beam-core', [{strokeDashoffset: '1'}, {strokeDashoffset: '0'}], 560);
-      animate('.beam-halo', [{opacity: 0}, {opacity: .55}], 610);
+      animate('.beam-core', [{strokeDashoffset: '1'}, {strokeDashoffset: '0'}], 650);
+      animate('.beam-halo', [{opacity: 0}, {opacity: .25}], 650);
       break;
     }
     case 'paint': {
@@ -30,42 +47,48 @@ export function playMotion(root, level, before, after, action) {
         const old = document.createElement('i');
         old.className = `paint-before c${before[i]}`;
         tiles[i].append(old);
-        const delay = 30 * (Math.abs(i % limit - action.i % limit) + Math.abs(Math.floor(i / limit) - Math.floor(action.i / limit)));
-        const animation = old.animate([{opacity: 1, clipPath: 'inset(0% round 5px)'}, {opacity: .15, clipPath: 'inset(42% round 30%)'}], {duration: 240, delay, fill: 'backwards', easing: ease});
+        const delay = 45 * (Math.abs(i % limit - action.i % limit) + Math.abs(Math.floor(i / limit) - Math.floor(action.i / limit)));
+        const animation = old.animate([
+          {opacity: 1, clipPath: 'inset(0% round 5px)'},
+          {opacity: .1, clipPath: 'inset(44% round 45%)'}
+        ], {duration: 300, delay, fill: 'backwards', easing: ease});
         animation.onfinish = () => old.remove();
       });
       break;
     }
     case 'move': {
-      slide('[data-token="player-token"]', before.p, after.p);
-      if (after.shadow !== undefined) slide('[data-token="echo-token"]', before.shadow, after.shadow);
+      slide('[data-token="player-token"]', before.p, after.p, 235);
+      if (after.shadow !== undefined) slide('[data-token="echo-token"]', before.shadow, after.shadow, 270);
       const pushed = before.boxes?.find(i => !after.boxes.includes(i));
       const moved = after.boxes?.find(i => !before.boxes.includes(i));
-      if (pushed !== undefined) slide(`[data-token="crate-token"][data-position="${moved}"]`, pushed, moved);
-      if (after.failed) animate('.walk-board', [{filter: 'brightness(1.35) sepia(.9)'}, {filter: 'none'}], 380);
+      if (pushed !== undefined) {
+        slide(`[data-token="crate-token"][data-position="${moved}"]`, pushed, moved, 390);
+        animate(`[data-token="crate-token"][data-position="${moved}"]`, [{filter: 'brightness(.82)'}, {filter: 'brightness(1)'}], 390);
+      }
+      if (after.failed) animate('.walk-board', [{filter: 'brightness(1.5) saturate(.4)'}, {filter: 'none'}], 450);
       break;
     }
     case 'swap':
-      slide(`[data-piece="${action.i}"]`, action.j, action.i);
-      slide(`[data-piece="${action.j}"]`, action.i, action.j);
+      slide(`[data-piece="${action.i}"]`, action.j, action.i, 340);
+      slide(`[data-piece="${action.j}"]`, action.i, action.j, 340);
       break;
     case 'turn': {
       const prior = before[action.i] % 4 * 90;
-      animate(`[data-piece="${action.i}"] svg`, [{transform: `rotate(${prior}deg)`}, {transform: `rotate(${prior + 90}deg)`}]);
+      animate(`[data-piece="${action.i}"] svg`, [{transform: `rotate(${prior}deg) scale(.88)`}, {transform: `rotate(${prior + 90}deg) scale(1)`}], 330);
       break;
     }
     case 'toggle':
       for (let i = 0; i < level.n ** 2; i++) {
-        if ((before ^ after) & (1 << i)) animate(`[data-cell="${i}"]`, [{filter: 'brightness(.72)'}, {filter: 'none'}], 280);
+        if ((before ^ after) & (1 << i)) animate(`[data-cell="${i}"]`, [{filter: 'brightness(.65)'}, {filter: 'none'}], 320);
       }
       break;
     case 'relay':
-      animate(`[data-relay="${action.i}"]`, [{scale: '.84'}, {scale: '1'}], 220);
-      animate('.circuit-wires', [{opacity: .2}, {opacity: 1}], 330);
+      animate(`[data-relay="${action.i}"]`, [{scale: '.72', opacity: .45}, {scale: '1', opacity: 1}], 360);
+      animate('.circuit-wires', [{opacity: .15}, {opacity: 1}], 440);
       break;
     case 'cube':
-      animate(`[data-cube="${action.i}"]`, [{scale: '.8'}, {scale: '1'}], 200);
-      animate(`.isometric [data-voxel="${action.i}"]`, [{opacity: .2}, {opacity: 1}], 260);
+      animate(`[data-cube="${action.i}"]`, [{scale: '.8'}, {scale: '1'}], 230);
+      animate(`.isometric [data-voxel="${action.i}"]`, [{opacity: .1, translate: '0 -15px'}, {opacity: 1, translate: '0 0'}], 340);
       break;
   }
 }

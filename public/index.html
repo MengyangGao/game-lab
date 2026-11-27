@@ -2,29 +2,32 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#101619">
-<meta name="description" content="Puzzle Lab 谜题实验室，随时打开就能玩的原创休闲益智合集。">
-<title>Puzzle Lab · 谜题实验室</title>
+<meta name="theme-color" content="#080f19">
+<meta name="description" content="Game Lab：以原创场景与关卡呈现经典游戏机关玩法，打开浏览器即可游玩。">
+<title>Game Lab · 机关玩法合集</title>
 <link rel="icon" href="./icon-192.png">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="stylesheet" href="./style.css">
 <script type="module" src="./app.js"></script>
 </head>
 <body>
+<div class="page-grain" aria-hidden="true"></div>
 <header class="site-header"><div class="shell header-content">
-  <a class="brand" href="#" aria-label="Puzzle Lab 首页"><span class="brand-icon" aria-hidden="true"></span> Puzzle Lab<span class="brand-caption">谜题实验室</span></a>
-  <button id="settings-button" class="quiet" type="button">设置</button>
+  <a class="brand" href="#" aria-label="Game Lab 游戏大厅"><span class="brand-icon" aria-hidden="true"><i></i><b></b></span><span class="brand-wordmark">GAME LAB<small>机关玩法合集</small></span></a>
+  <nav class="header-nav" aria-label="主导航"><a href="#">游戏大厅</a><a href="#collection">玩法图鉴</a></nav>
+  <div class="header-actions"><span class="local-status"><i></i>本地存档</span><button id="settings-button" class="settings-button" type="button" aria-label="设置"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm8 4-2-1 .2-2.2-2.4-2.4-2.2.6-1.2-1.8L9.8 5l-.7 2.1-2.2.4L5.6 9.8 7 11.6 5.8 14l2.1 1 1.4 2.4 2.1-.4 1.6 1.5 1.4-1.8 2.2-.3.5-2.2Z"/></svg><span>设置</span></button></div>
 </div></header>
 <main id="app" class="shell"></main>
-<footer class="shell footer"><strong>Puzzle Lab</strong><span>非商业玩法研究 · 原作权利归各自权利人</span><span id="offline" role="status"></span></footer>
+<footer class="shell footer"><a class="footer-brand" href="#">GAME LAB</a><span>非商业 · 非官方 · 玩法研究与致敬</span><span>原作名称及相关权利归各自权利人所有</span><span id="offline" role="status"></span></footer>
 <dialog id="settings"><form method="dialog">
-  <div class="dialog-heading"><h2>设置</h2><button class="quiet" aria-label="关闭设置">关闭</button></div>
-  <label><input id="motion" type="checkbox"> 减少动画</label>
-  <label><input id="symbols" type="checkbox"> 显示颜色图案</label>
-  <p id="install-help" hidden>可以从浏览器菜单添加到主屏幕。</p>
-  <button id="install" type="button" class="primary" hidden>安装 Puzzle Lab</button>
+  <div class="dialog-heading"><div><p>SYSTEM</p><h2>游戏设置</h2></div><button class="quiet" aria-label="关闭设置">关闭</button></div>
+  <label class="setting-row"><span><strong>减少动态效果</strong><small>关闭场景过渡、光线与粒子动画</small></span><input id="motion" type="checkbox" role="switch"></label>
+  <label class="setting-row"><span><strong>显示颜色辅助图案</strong><small>在溢彩画的色块与颜料上显示不同符号</small></span><input id="symbols" type="checkbox" role="switch"></label>
+  <div class="settings-note"><strong>关于 Game Lab</strong><p>本项目使用原创程序、场景、界面与关卡，探索不同游戏中的经典机关机制。项目与原作开发、发行方无合作、授权或背书关系。</p></div>
+  <p id="install-help" hidden>可通过浏览器菜单将 Game Lab 添加到主屏幕。</p>
+  <button id="install" type="button" class="primary" hidden>安装 Game Lab</button>
 </form></dialog>
 </body>
 </html>

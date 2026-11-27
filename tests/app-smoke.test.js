@@ -55,16 +55,12 @@ for (const id of ['mirror', 'flood', 'relay', 'crate', 'echo', 'voxel', 'mosaic'
   route(`#${id}/1`);
   check(app.innerHTML.includes('1</strong> 步'), `resume: ${id}`);
   command('undo');
-  for (let i = 0; i < 16 && !app.innerHTML.includes('实验完成！'); i++) {
-    if (id === 'mirror' && app.innerHTML.includes('data-command="hint" disabled')) {
-      command('fire');
-      continue;
-    }
+  for (let i = 0; i < 16 && !app.innerHTML.includes('挑战成功'); i++) {
     command('hint');
     command('hint');
     command('hint');
   }
-  check(app.innerHTML.includes('实验完成！'), `complete: ${id}`);
+  check(app.innerHTML.includes('挑战成功'), `complete: ${id}`);
   command('reset');
   check(app.innerHTML.includes('0</strong> 步'), `reset: ${id}`);
   check(app.innerHTML.includes('已完成'), `best persisted: ${id}`);
@@ -78,11 +74,12 @@ click({piece: '1'});
 check(app.innerHTML.includes('2</strong> 步'), 'direct swap');
 
 route('#echo/random/2/42');
-check(app.innerHTML.includes('随机实验'), 'shareable random route');
-check(JSON.parse(values.get('puzzle-lab.v1')).last === '#echo/random/2/42', 'save records random route');
+check(app.innerHTML.includes('随机关卡'), 'shareable random route');
+check(JSON.parse(values.get('game-lab.v1')).last === '#echo/random/2/42', 'save records random route');
 console.log('PASS application routing, rendering, hints, progression and local persistence');
 
 const {readSave} = await import('../public/storage.js');
+values.delete('game-lab.v1');
 values.set('puzzle-lab.v1', JSON.stringify({
   version: 1,
   best: {'flood/1': 2, 'echo/2': 5, 'mirror/1': 2},

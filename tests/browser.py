@@ -1,4 +1,4 @@
-"""End-to-end checks for a running static Puzzle Lab instance."""
+"""End-to-end checks for a running static Game Lab instance."""
 import os
 import re
 from pathlib import Path
@@ -40,7 +40,7 @@ with sync_playwright() as playwright:
     expect(page.locator(".progress-pill")).to_contain_text("0 / 72")
     no_overflow(page)
     assert page.locator(".hero-image").evaluate("(image) => image.complete && image.naturalWidth > 0")
-    page.get_by_role("link", name="浏览机关").click()
+    page.get_by_role("link", name="浏览全部玩法").click()
     expect(page.locator("#collection")).to_be_focused()
     page.evaluate("window.scrollTo(0,0)")
     screenshots(page, "desktop-home")
@@ -52,10 +52,9 @@ with sync_playwright() as playwright:
         expect(page.locator(".stats")).to_contain_text("0 步")
         screenshots(page, f"desktop-{game}", page.locator(".workbench"))
         if game == "mirror":
-            page.get_by_role("button", name="试射", exact=True).click()
-            expect(page.locator(".feedback")).to_contain_text("接收端未校准")
+            expect(page.locator(".beam.fired")).to_be_visible()
             expect(page.locator(".stats")).to_contain_text("0 步")
-        page.get_by_role("button", name="提示", exact=True).click()
+        page.get_by_role("button", name="玩法提示", exact=True).click()
         expect(page.locator(".feedback")).not_to_be_empty()
         page.get_by_role("button", name="标出位置").click()
         expect(page.locator(".marked").first).to_be_visible()
@@ -66,16 +65,12 @@ with sync_playwright() as playwright:
         page.get_by_role("button", name="撤销").click()
         expect(page.locator(".stats")).to_contain_text("0 步")
         for _ in range(16):
-            if page.locator(".feedback a").count():
+            if page.locator(".clear-overlay").count():
                 break
-            if game == "mirror" and page.get_by_role("button", name="提示", exact=True).is_disabled():
-                page.get_by_role("button", name="试射", exact=True).click()
-                expect(page.locator(".beam.fired")).to_be_visible()
-                continue
-            for text in ["提示", "标出位置", "执行提示"]:
+            for text in ["玩法提示", "标出位置", "执行提示"]:
                 page.get_by_role("button", name=text, exact=True).click()
-        expect(page.get_by_text("实验完成！")).to_be_visible()
-        expect(page.locator(".level-grid a").first).to_have_attribute("aria-label", "1. " + page.locator("h1").inner_text() + "，已完成")
+        expect(page.get_by_text("挑战成功", exact=True)).to_be_visible()
+        expect(page.locator(".level-grid a").first).to_have_attribute("aria-label", re.compile(r"1\..*，已完成"))
         page.get_by_role("button", name="重置").click()
         expect(page.locator(".stats")).to_contain_text("0 步")
         no_overflow(page)
@@ -84,10 +79,10 @@ with sync_playwright() as playwright:
     cell = page.locator("[data-relay]").first
     cell.click()
     expect(cell).to_have_attribute("aria-pressed", "true")
-    expect(page.locator(".circuit-inventory")).to_contain_text("余量 2")
+    expect(page.locator(".circuit-inventory strong").first).to_have_text("2")
     cell.click()
     expect(cell).to_have_attribute("aria-pressed", "false")
-    expect(page.locator(".circuit-inventory")).to_contain_text("余量 3")
+    expect(page.locator(".circuit-inventory strong").first).to_have_text("3")
 
     page.goto(f"{URL}#mosaic/2")
     source = page.locator("[data-piece='0']")
@@ -104,9 +99,9 @@ with sync_playwright() as playwright:
     for moves in (1, 2, 3):
         page.get_by_role("button", name="等待", exact=True).click()
         expect(page.locator(".stats")).to_contain_text(f"{moves} 步")
-    expect(page.locator(".feedback")).to_contain_text("撞上了回声")
+    expect(page.locator(".feedback")).to_contain_text("触碰了黑暗")
     page.get_by_role("button", name="撤销").click()
-    expect(page.locator(".feedback")).not_to_contain_text("撞上了回声")
+    expect(page.locator(".feedback")).not_to_contain_text("触碰了黑暗")
 
     page.goto(f"{URL}#voxel/1")
     position = page.locator(".isometric [data-voxel='0']").get_attribute("transform")
@@ -119,20 +114,23 @@ with sync_playwright() as playwright:
     page.keyboard.press("ArrowRight")
     expect(page.locator("[data-color]").nth(1)).to_be_focused()
     page.locator(".pigment [data-cell='4']").click()
-    expect(page.locator(".pigment [data-cell='4']")).to_have_class(re.compile(r"filled"))
+    expect(page.locator(".feedback")).to_contain_text("请先")
+    expect(page.locator(".stats")).to_contain_text("0 步")
     selected = page.locator(".pigment [data-cell='4']").get_attribute("class")
     new_color = next(i for i in range(3) if f"c{i}" not in selected)
     page.locator(f"[data-color='{new_color}']").click()
+    expect(page.locator(f"[data-color='{new_color}']")).to_have_attribute("aria-pressed", "true")
+    page.locator(".pigment [data-cell='4']").click()
     expect(page.locator(".stats")).to_contain_text("1 步")
     expect(page.locator(".pigment [data-cell='4']")).to_have_class(re.compile(f"c{new_color}"))
     page.locator("#difficulty").select_option("2")
-    page.get_by_role("button", name="生成新关卡").click()
-    expect(page.locator("h1")).to_have_text("随机实验")
+    page.get_by_role("button", name="生成关卡").click()
+    expect(page.locator("h1")).to_contain_text("随机关卡")
     assert "#flood/random/2/" in page.url
 
     page.get_by_role("button", name="设置").click()
-    page.get_by_label("减少动画").check()
-    page.get_by_label("显示颜色图案").uncheck()
+    page.get_by_label("减少动态效果").check()
+    page.get_by_label("显示颜色辅助图案").uncheck()
     page.get_by_role("button", name="关闭设置").click()
     page.reload()
     expect(page.locator("html")).to_have_attribute("data-motion", "true")
@@ -141,7 +139,7 @@ with sync_playwright() as playwright:
     expect(page.locator("#offline")).to_have_text("可离线游玩")
     desktop.set_offline(True)
     page.reload()
-    expect(page.locator("h1")).to_have_text("随机实验")
+    expect(page.locator("h1")).to_contain_text("随机关卡")
     page.goto(f"{URL}#echo/4")
     expect(page.locator(".walk-board")).to_be_visible()
     assert not errors, errors
@@ -168,6 +166,7 @@ with sync_playwright() as playwright:
     phone.locator("[data-piece]").nth(1).tap()
     phone.locator("[data-piece]").nth(2).tap()
     expect(phone.locator(".stats")).to_contain_text("2 步")
+    phone.wait_for_timeout(450)
     screenshots(phone, "mobile-mosaic")
     if browser_type == "chromium":
         phone.goto(f"{URL}#mosaic/2")
@@ -183,6 +182,15 @@ with sync_playwright() as playwright:
             cdp.send("Input.dispatchTouchEvent", {"type": "touchMove", "touchPoints": [{"x": x, "y": y}]})
         cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
         expect(phone.locator(".stats")).to_contain_text("1 步")
+    for game in ["mirror", "mosaic"]:
+        phone.goto(f"{URL}#{game}/2")
+        for _ in range(16):
+            if phone.locator(".clear-overlay").count():
+                break
+            for text in ["玩法提示", "标出位置", "执行提示"]:
+                phone.get_by_role("button", name=text, exact=True).click()
+        expect(phone.get_by_text("挑战成功", exact=True)).to_be_visible()
+        no_overflow(phone)
     mobile.close()
     browser.close()
     print("PASS desktop/touch, drag, paint, movement, model rotation, eight games, saving, layout, and offline restart")

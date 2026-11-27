@@ -1,7 +1,8 @@
-const prefix = `puzzle-lab:${self.registration.scope}:`;
-const cacheName = prefix + 'v6';
+const prefix = `game-lab:${self.registration.scope}:`;
+const legacyPrefix = `puzzle-lab:${self.registration.scope}:`;
+const cacheName = prefix + 'v1';
 const files = [
-  './', './index.html', './style.css', './app.js', './campaign.js', './views.js', './extra-views.js', './storage.js', './motion.js', './circuit-view.js', './assets/optical-archive.webp', './assets/tidal-glass.webp',
+  './', './index.html', './style.css', './app.js', './campaign.js', './views.js', './extra-views.js', './storage.js', './motion.js', './circuit-view.js', './scene.js', './assets/optical-archive.webp', './assets/tidal-glass.webp',
   './games/common.js', './games/mirror.js', './games/flood.js', './games/switch.js',
   './games/crate.js', './games/echo.js', './games/voxel.js', './games/mosaic.js', './games/circuit.js',
   './manifest.webmanifest', './icon-192.png', './icon-512.png'
@@ -14,7 +15,7 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
-    const oldCaches = (await caches.keys()).filter(key => key.startsWith(prefix) && key !== cacheName);
+    const oldCaches = (await caches.keys()).filter(key => (key.startsWith(prefix) || key.startsWith(legacyPrefix)) && key !== cacheName);
     await Promise.all(oldCaches.map(key => caches.delete(key)));
     await self.clients.claim();
   })());
