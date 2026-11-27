@@ -42,7 +42,7 @@ jobs:
 
   deploy:
     needs: [engines, browser]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: vars.PUZZLE_LAB_PAGES_ENABLED == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
