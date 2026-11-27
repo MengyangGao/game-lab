@@ -13,11 +13,15 @@ def no_overflow(page):
     assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
 
 
-def screenshots(page, name):
+def screenshots(page, name, target_element=None):
     if SCREENSHOTS:
         target = Path(SCREENSHOTS)
         target.mkdir(parents=True, exist_ok=True)
-        page.screenshot(path=target / f"{name}.png", full_page=True)
+        path = target / f"{name}.png"
+        if target_element is None:
+            page.screenshot(path=path, full_page=True)
+        else:
+            target_element.screenshot(path=path)
 
 
 with sync_playwright() as playwright:
@@ -38,6 +42,7 @@ with sync_playwright() as playwright:
 
     for game in GAMES:
         page.goto(f"{URL}#{game}/1")
+        expect(page.locator(".level-grid a[aria-current]")).to_have_attribute("href", f"#{game}/1")
         expect(page.locator(".level-grid a")).to_have_count(9)
         expect(page.locator(".stats")).to_contain_text("0 步")
         page.get_by_role("button", name="提示", exact=True).click()
@@ -60,7 +65,7 @@ with sync_playwright() as playwright:
         page.get_by_role("button", name="重置").click()
         expect(page.locator(".stats")).to_contain_text("0 步")
         no_overflow(page)
-        screenshots(page, f"desktop-{game}")
+        screenshots(page, f"desktop-{game}", page.locator(".workbench"))
 
     page.goto(f"{URL}#flood/1")
     page.locator("[data-color]").first.focus()

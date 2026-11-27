@@ -59,7 +59,7 @@ function switches(level, state, preview, hint) {
 
 export const games = {
   mirror: {
-    engine: mirror, title: '折光室', english: 'PRISM ROOM', icon: '◈',
+    engine: mirror, title: '匣里流光', english: 'LUMINFLUX PYXIS', icon: '◈',
     tags: '空间推理', summary: '转动镜面，让一束光穿过暗室。',
     rule: '点击银色镜面改变反射方向。让光束先经过所有菱形感光器，再抵达圆形接收器。',
     tip: '先找光束离开棋盘或撞墙前遇到的最后一面镜子。',
@@ -70,7 +70,7 @@ export const games = {
     action: i => ({type: 'rotate', i}), draw: optical
   },
   flood: {
-    engine: flood, title: '染色岛', english: 'COLOR ISLAND', icon: '✿',
+    engine: flood, title: '溢彩画', english: 'OVERFLOWING PALETTE', icon: '✿',
     tags: '顺序规划', summary: '选择下一抹颜色，把孤岛连成一片。',
     rule: '从左上角的白色描边区域开始。选一种颜色，把区域染成该色，并吸收所有相连的同色格。让整幅画成为同一种颜色。',
     tip: '关注已染区域接触到的颜色。先打开通往棋盘另一端的路线。',
@@ -79,7 +79,7 @@ export const games = {
   },
   ...extraGames,
   relay: {
-    engine: relay, title: '静电阵', english: 'AFTERGLOW', icon: '✦',
+    engine: relay, title: '熄灯', english: 'LIGHTS OUT', icon: '✦',
     tags: '联动逻辑', summary: '轻触一盏灯，改变周围四邻的状态。',
     rule: '点击任意格，会同时翻转这盏灯和它上下左右相邻的灯。把所有灯熄灭即可过关。',
     tip: '同一格点击两次会抵消。试着先考虑能同时处理几盏灯的位置。',

@@ -101,7 +101,7 @@ function picture(level, state, preview, hint, selected) {
 
 export const extraGames = {
   crate: {
-    engine: crate, title: '方箱营救', english: 'CRATE RESCUE', tags: '移动规划',
+    engine: crate, title: '庸人的容器', english: 'VESSEL OF MEDIOCRITY', tags: '移动规划',
     summary: '推开挡路的方箱，抵达营救点。',
     rule: '移动圆点，推开方箱，到达星形营救点。一次只能推一个箱子，箱子无法拉回。',
     tip: '从营救点往回找路线，留意箱子后面是否有空间站立。',
@@ -110,7 +110,7 @@ export const extraGames = {
     movement: true
   },
   voxel: {
-    engine: voxel, title: '三面剪影', english: 'SHADOW PRISM', tags: '立体投影',
+    engine: voxel, title: '枘凿六合·Remake', english: 'HEXANEXUS: REMAKE', tags: '立体投影',
     summary: '填充体素，让三面投影同时吻合。',
     rule: '每层有四个位置，点击添加或移除方块。菱形方块固定。三个投影都需匹配：圆圈待填，叉号表示多填。',
     tip: '某处投影本应为空时，检查同一条视线上的所有层。',
@@ -118,7 +118,7 @@ export const extraGames = {
     draw: volume
   },
   mosaic: {
-    engine: mosaic, title: '梦片画廊', english: 'DREAM MOSAIC', tags: '图形拼合',
+    engine: mosaic, title: '梦境拼图', english: 'DREAM JIGSAW', tags: '图形拼合',
     summary: '换位、旋转，找回一张打散的图画。',
     rule: '选中一张画片，再选择另一张可交换。按「旋转选中画片」顺时针转动 90°，拼成目标图。',
     tip: '先找最大的连续轮廓，观察它是否能接到邻格。',
@@ -126,7 +126,7 @@ export const extraGames = {
     draw: picture
   },
   echo: {
-    engine: echo, title: '回声倒影', english: 'ECHO WALK', tags: '时间规划',
+    engine: echo, title: '黄金替罪羊', english: 'GOLDEN SCAPEGOAT', tags: '时间规划',
     summary: '用过去的脚步，为现在的自己开门。',
     rule: '回声从起点延迟几步复演指令。用 ◈ 标出的开关接住回声，同时让自己抵达星形出口。双方不能相撞或交换位置。',
     tip: '先想好一条去开关的路线，再安排现在的你怎样离开这条路线。',

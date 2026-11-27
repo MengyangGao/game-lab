@@ -114,7 +114,7 @@ function play(refocus, announcement) {
       <form id="random-form"><label for="difficulty">随机实验</label><select id="difficulty">
       ${difficulties.map((label, i) => `<option value="${i}" ${i === level.difficulty ? 'selected' : ''}>${label}</option>`).join('')}</select>
       <button class="primary">生成新关卡</button></form>
-      <p class="keyboard">${game.movement ? '方向键移动，空格等待（回声倒影）。' : 'Tab 切换控件，Enter 或空格操作。'}</p>
+      <p class="keyboard">${game.movement ? '方向键移动，空格等待（黄金替罪羊）。' : 'Tab 切换控件，Enter 或空格操作。'}</p>
     </aside>
   </div>`;
   if (refocus) {
