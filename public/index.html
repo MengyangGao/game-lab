@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f8f7fc">
+<meta name="description" content="Puzzle Lab 谜题实验室，随时打开就能玩的原创休闲益智合集。">
+<title>Puzzle Lab · 谜题实验室</title>
+<link rel="icon" href="./icon-192.png">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="stylesheet" href="./style.css">
+<script type="module" src="./app.js"></script>
+</head>
+<body>
+<header class="site-header"><div class="shell header-content">
+  <a class="brand" href="#" aria-label="Puzzle Lab 首页"><span class="brand-icon" aria-hidden="true">✦</span> Puzzle Lab<span class="brand-caption">谜题实验室</span></a>
+  <button id="settings-button" class="quiet" type="button">设置</button>
+</div></header>
+<main id="app" class="shell"></main>
+<footer class="shell footer"><strong>Puzzle Lab</strong><span>慢慢想，随时回来。</span><span id="offline" role="status"></span></footer>
+<dialog id="settings"><form method="dialog">
+  <div class="dialog-heading"><h2>设置</h2><button class="quiet" aria-label="关闭设置">关闭</button></div>
+  <label><input id="motion" type="checkbox"> 减少动画</label>
+  <label><input id="symbols" type="checkbox"> 显示颜色图案</label>
+  <p id="install-help" hidden>可以从浏览器菜单添加到主屏幕。</p>
+  <button id="install" type="button" class="primary" hidden>安装 Puzzle Lab</button>
+</form></dialog>
+</body>
+</html>

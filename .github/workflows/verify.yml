@@ -1,0 +1,35 @@
+name: Verify Puzzle Lab
+on: [push, pull_request]
+
+jobs:
+  engines:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm test
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install playwright
+      - run: playwright install --with-deps chromium
+      - run: |
+          python -m http.server 8174 --bind 127.0.0.1 --directory public &
+          for attempt in {1..20}; do
+            if curl --silent --fail http://127.0.0.1:8174/ > /dev/null; then break; fi
+            sleep 1
+          done
+          python tests/browser.py
+        env:
+          PUZZLE_LAB_SCREENSHOTS: screenshots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: screenshots

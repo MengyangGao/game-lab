@@ -1,0 +1,79 @@
+// Smoke-test the application controller with lightweight host stubs.
+// Actual DOM, keyboard, touch and offline behavior are covered by browser.py.
+const handlers = new Map();
+const values = new Map();
+const nodes = new Map();
+const active = () => ({focus() {}, animate() {}});
+const node = id => {
+  if (!nodes.has(id)) nodes.set(id, {
+    dataset: {}, focus() {}, querySelector: active,
+    addEventListener: (name, callback) => handlers.set(`${id}:${name}`, callback)
+  });
+  return nodes.get(id);
+};
+const app = node('#app');
+
+Object.defineProperties(globalThis, {
+  navigator: {value: {}, configurable: true},
+  document: {value: {...node('document'), documentElement: {dataset: {}}, querySelector: node}},
+  location: {value: {hash: ''}},
+  localStorage: {value: {
+    getItem: key => values.get(key),
+    setItem: (key, value) => values.set(key, value)
+  }},
+  crypto: {value: {getRandomValues: () => [123456]}, configurable: true},
+  matchMedia: {value: () => ({matches: false})}
+});
+
+if (!globalThis.window) globalThis.window = node('window');
+else globalThis.window.addEventListener = node('window').addEventListener;
+
+await import('../public/app.js');
+
+function check(success, context) {
+  if (!success) throw new Error(context);
+}
+
+const click = dataset => handlers.get('#app:click')({target: {closest: () => ({dataset})}});
+const command = name => click({command: name});
+const route = hash => {
+  location.hash = hash;
+  handlers.get('window:hashchange')();
+};
+
+check((app.innerHTML.match(/<article /g) ?? []).length === 7, 'home renders all seven games');
+for (const id of ['mirror', 'flood', 'relay', 'crate', 'echo', 'voxel', 'mosaic']) {
+  route(`#${id}/1`);
+  check(app.innerHTML.includes('0</strong> 步'), `initial view: ${id}`);
+  command('hint');
+  check(app.innerHTML.includes('标出位置'), `strategy: ${id}`);
+  command('hint');
+  check(app.innerHTML.includes('marked'), `highlight: ${id}`);
+  command('hint');
+  check(app.innerHTML.includes('1</strong> 步'), `execute: ${id}`);
+  route('#');
+  route(`#${id}/1`);
+  check(app.innerHTML.includes('1</strong> 步'), `resume: ${id}`);
+  command('undo');
+  for (let i = 0; i < 16 && !app.innerHTML.includes('实验完成！'); i++) {
+    command('hint');
+    command('hint');
+    command('hint');
+  }
+  check(app.innerHTML.includes('实验完成！'), `complete: ${id}`);
+  command('reset');
+  check(app.innerHTML.includes('0</strong> 步'), `reset: ${id}`);
+  check(app.innerHTML.includes('已完成'), `best persisted: ${id}`);
+}
+
+route('#mosaic/1');
+click({piece: '0'});
+click({turn: ''});
+check(app.innerHTML.includes('1</strong> 步'), 'direct rotation');
+click({piece: '1'});
+check(app.innerHTML.includes('2</strong> 步'), 'direct swap');
+
+route('#echo/random/2/42');
+check(app.innerHTML.includes('随机实验'), 'shareable random route');
+check(JSON.parse(values.get('puzzle-lab.v1')).last === '#echo/random/2/42', 'save records random route');
+console.log('PASS application routing, rendering, hints, progression and local persistence');
