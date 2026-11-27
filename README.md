@@ -97,7 +97,7 @@ python -m playwright install chromium
 python scripts/acceptance.py
 ```
 
-也可通过 `PUZZLE_LAB_BROWSER_EXECUTABLE` 指定本机 Chrome/Chromium 可执行文件。GitHub Actions 会运行引擎测试与 Chromium 端到端检查。仓库变量 `PUZZLE_LAB_PAGES_ENABLED=true` 用于启用自动发布，部署路径继续保持 `/puzzle-lab/`。
+也可通过 `PUZZLE_LAB_BROWSER_EXECUTABLE` 指定本机 Chrome/Chromium 可执行文件。GitHub Actions 会运行引擎测试与 Chromium 端到端检查，检查通过的 `main` 版本会自动发布到 GitHub Pages，部署路径继续保持 `/puzzle-lab/`。
 
 - [玩法调研与规则取舍](docs/research.md)
 - [开发与状态接口](docs/development.md)
