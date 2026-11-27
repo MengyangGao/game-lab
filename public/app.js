@@ -171,9 +171,9 @@ const suppressClick = connectGestures(app, {
 });
 
 app.addEventListener('click', event => {
-  if (!current || suppressClick()) return;
+  if (!current) return;
   const button = event.target.closest('button');
-  if (!button) return;
+  if (!button || (button.dataset.piece !== undefined && suppressClick())) return;
   const {cell, color, command, cube, move, piece, turn, view} = button.dataset;
   if (view !== undefined) {
     modelView = (modelView + 1) % 4;

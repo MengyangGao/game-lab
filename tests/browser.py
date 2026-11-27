@@ -80,8 +80,9 @@ with sync_playwright() as playwright:
     expect(page.locator("[data-token='player-token']")).to_have_attribute("data-position", "12")
 
     page.goto(f"{URL}#echo/1")
-    for _ in range(3):
+    for moves in (1, 2, 3):
         page.get_by_role("button", name="等待", exact=True).click()
+        expect(page.locator(".stats")).to_contain_text(f"{moves} 步")
     expect(page.locator(".feedback")).to_contain_text("撞上了回声")
     page.get_by_role("button", name="撤销").click()
     expect(page.locator(".feedback")).not_to_contain_text("撞上了回声")
