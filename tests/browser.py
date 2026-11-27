@@ -45,6 +45,7 @@ with sync_playwright() as playwright:
         expect(page.locator(".level-grid a[aria-current]")).to_have_attribute("href", f"#{game}/1")
         expect(page.locator(".level-grid a")).to_have_count(9)
         expect(page.locator(".stats")).to_contain_text("0 步")
+        screenshots(page, f"desktop-{game}", page.locator(".workbench"))
         page.get_by_role("button", name="提示", exact=True).click()
         expect(page.locator(".feedback")).not_to_be_empty()
         page.get_by_role("button", name="标出位置").click()
@@ -65,7 +66,6 @@ with sync_playwright() as playwright:
         page.get_by_role("button", name="重置").click()
         expect(page.locator(".stats")).to_contain_text("0 步")
         no_overflow(page)
-        screenshots(page, f"desktop-{game}", page.locator(".workbench"))
 
     page.goto(f"{URL}#flood/1")
     page.locator("[data-color]").first.focus()

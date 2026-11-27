@@ -16,7 +16,33 @@ Puzzle Lab 是一个纯静态、中文优先的原创休闲益智合集。七个
 
 <!-- screenshot-gallery:start -->
 
-通过浏览器验收后，`python scripts/acceptance.py` 会在此写入七款游戏的实机截图。
+### 匣里流光
+
+![匣里流光实机截图](docs/screenshots/mirror.png)
+
+### 溢彩画
+
+![溢彩画实机截图](docs/screenshots/flood.png)
+
+### 庸人的容器
+
+![庸人的容器实机截图](docs/screenshots/crate.png)
+
+### 枘凿六合·Remake
+
+![枘凿六合·Remake实机截图](docs/screenshots/voxel.png)
+
+### 梦境拼图
+
+![梦境拼图实机截图](docs/screenshots/mosaic.png)
+
+### 黄金替罪羊
+
+![黄金替罪羊实机截图](docs/screenshots/echo.png)
+
+### 熄灯
+
+![熄灯实机截图](docs/screenshots/relay.png)
 
 <!-- screenshot-gallery:end -->
 
