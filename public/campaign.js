@@ -12,15 +12,15 @@ export const campaign = {
     {"n":7,"source":[0,-1,0],"target":27,"mirrors":[1,43,46,25,11,30,5],"walls":[3,34,21,48,33,24],"sensors":[45,32],"initial":12,"seed":817,"difficulty":2,"par":4,"title":"暗室传输","id":"9"}
   ],
   flood: [
-    {"n":3,"colors":3,"tiles":[0,0,1,0,2,2,0,2,0],"initial":{"region":75,"color":0},"seed":11,"difficulty":0,"par":3,"title":"第一滴颜料","id":"1"},
-    {"n":3,"colors":3,"tiles":[0,0,2,1,0,1,0,0,0],"initial":{"region":467,"color":0},"seed":76,"difficulty":0,"par":2,"title":"早晨的窗","id":"2"},
-    {"n":3,"colors":3,"tiles":[0,2,0,0,0,2,2,2,0],"initial":{"region":25,"color":0},"seed":94,"difficulty":0,"par":2,"title":"相邻色块","id":"3"},
-    {"n":4,"colors":4,"tiles":[0,3,0,1,2,3,3,1,1,0,1,3,3,0,1,2],"initial":{"region":1,"color":0},"seed":29,"difficulty":1,"par":5,"title":"染料分岔","id":"4"},
-    {"n":4,"colors":4,"tiles":[1,2,1,1,2,2,3,2,2,2,0,1,3,1,0,2],"initial":{"region":1,"color":1},"seed":71,"difficulty":1,"par":5,"title":"纸上潮汐","id":"5"},
-    {"n":4,"colors":4,"tiles":[1,1,2,0,0,0,1,1,0,2,2,2,3,0,2,3],"initial":{"region":3,"color":1},"seed":121,"difficulty":1,"par":5,"title":"回旋色域","id":"6"},
-    {"n":5,"colors":5,"tiles":[1,3,3,1,0,2,1,1,3,2,0,3,1,0,3,4,0,2,0,4,2,2,0,1,4],"initial":{"region":1,"color":1},"seed":16,"difficulty":2,"par":8,"title":"混色练习","id":"7"},
-    {"n":5,"colors":5,"tiles":[1,0,2,3,0,2,3,4,2,4,3,1,4,0,1,2,3,3,0,0,0,1,3,4,0],"initial":{"region":1,"color":1},"seed":163,"difficulty":2,"par":8,"title":"暮色拼盘","id":"8"},
-    {"n":5,"colors":5,"tiles":[2,4,1,1,1,4,4,4,2,3,3,1,4,3,1,0,3,1,3,4,2,3,2,2,1],"initial":{"region":1,"color":2},"seed":855,"difficulty":2,"par":7,"title":"满幅渐染","id":"9"}
+    {"n":3,"colors":3,"target":0,"initial":"220200012","seed":41,"difficulty":0,"par":3,"title":"第一滴颜料","id":"1"},
+    {"n":3,"colors":3,"target":0,"initial":"021010002","seed":76,"difficulty":0,"par":3,"title":"早晨的窗","id":"2"},
+    {"n":3,"colors":3,"target":0,"initial":"200022202","seed":94,"difficulty":0,"par":2,"title":"相邻色块","id":"3"},
+    {"n":4,"colors":4,"target":0,"initial":"3222130103231200","seed":29,"difficulty":1,"par":4,"title":"染料分岔","id":"4"},
+    {"n":4,"colors":4,"target":1,"initial":"2112232220131022","seed":71,"difficulty":1,"par":4,"title":"纸上潮汐","id":"5"},
+    {"n":4,"colors":4,"target":1,"initial":"1200011022230230","seed":121,"difficulty":1,"par":4,"title":"回旋色域","id":"6"},
+    {"n":4,"colors":4,"target":3,"initial":"2320323323032331","seed":16,"difficulty":2,"par":5,"title":"混色练习","id":"7"},
+    {"n":4,"colors":4,"target":1,"initial":"0120123133130012","seed":163,"difficulty":2,"par":5,"title":"暮色拼盘","id":"8"},
+    {"n":4,"colors":4,"target":1,"initial":"0230200012310023","seed":855,"difficulty":2,"par":5,"title":"满幅渐染","id":"9"}
   ],
   crate: [
     {"n":5,"exit":19,"walls":[14,24,16,22,2],"initial":{"p":11,"boxes":[17,18]},"seed":22,"difficulty":0,"par":4,"title":"出门之前","id":"1"},
@@ -56,15 +56,15 @@ export const campaign = {
     {"n":3,"art":4,"initial":[16,5,9,12,33,0,28,24,20],"seed":821,"difficulty":2,"par":13,"title":"梦醒时分","id":"9"}
   ],
   echo: [
-    {"n":4,"exit":6,"plate":9,"walls":[11,8],"delay":2,"initial":{"p":14,"shadow":14,"queue":[]},"seed":18,"difficulty":0,"par":4,"title":"隔两拍","id":"1"},
-    {"n":4,"exit":4,"plate":1,"walls":[13,0],"delay":2,"initial":{"p":10,"shadow":10,"queue":[]},"seed":51,"difficulty":0,"par":5,"title":"脚步回响","id":"2"},
-    {"n":4,"exit":12,"plate":4,"walls":[14,3],"delay":2,"initial":{"p":5,"shadow":5,"queue":[]},"seed":303,"difficulty":0,"par":3,"title":"同步","id":"3"},
-    {"n":4,"exit":1,"plate":9,"walls":[7,12,10],"delay":3,"initial":{"p":3,"shadow":3,"queue":[]},"seed":20,"difficulty":1,"par":7,"title":"晚来的同伴","id":"4"},
-    {"n":4,"exit":1,"plate":2,"walls":[11,12,5],"delay":3,"initial":{"p":4,"shadow":4,"queue":[]},"seed":53,"difficulty":1,"par":8,"title":"错开一步","id":"5"},
-    {"n":4,"exit":2,"plate":4,"walls":[11,12,1],"delay":3,"initial":{"p":15,"shadow":15,"queue":[]},"seed":304,"difficulty":1,"par":8,"title":"留在原地","id":"6"},
-    {"n":5,"exit":11,"plate":0,"walls":[13,16,15,9],"delay":3,"initial":{"p":24,"shadow":24,"queue":[]},"seed":21,"difficulty":2,"par":11,"title":"空房间","id":"7"},
-    {"n":5,"exit":23,"plate":24,"walls":[15,6,14,1],"delay":3,"initial":{"p":10,"shadow":10,"queue":[]},"seed":56,"difficulty":2,"par":9,"title":"穿过长廊","id":"8"},
-    {"n":5,"exit":21,"plate":22,"walls":[0,7,15,11],"delay":3,"initial":{"p":1,"shadow":1,"queue":[]},"seed":305,"difficulty":2,"par":10,"title":"两条时间线","id":"9"}
+    {"n":4,"exit":2,"plate":3,"walls":[11,10],"delay":2,"initial":{"p":1,"shadow":1,"queue":[],"cursor":0,"failed":false},"seed":18,"difficulty":0,"par":5,"title":"隔两拍","id":"1"},
+    {"n":4,"exit":8,"plate":1,"walls":[10,14],"delay":2,"initial":{"p":4,"shadow":4,"queue":[],"cursor":0,"failed":false},"seed":51,"difficulty":0,"par":5,"title":"脚步回响","id":"2"},
+    {"n":4,"exit":12,"plate":4,"walls":[14,3],"delay":2,"initial":{"p":5,"shadow":5,"queue":[],"cursor":0,"failed":false},"seed":303,"difficulty":0,"par":3,"title":"同步","id":"3"},
+    {"n":4,"exit":14,"plate":9,"walls":[12,11,7],"delay":3,"initial":{"p":2,"shadow":2,"queue":[],"cursor":0,"failed":false},"seed":20,"difficulty":1,"par":6,"title":"晚来的同伴","id":"4"},
+    {"n":4,"exit":10,"plate":2,"walls":[6,15,0],"delay":3,"initial":{"p":3,"shadow":3,"queue":[],"cursor":0,"failed":false},"seed":53,"difficulty":1,"par":7,"title":"错开一步","id":"5"},
+    {"n":4,"exit":8,"plate":2,"walls":[13,9,12],"delay":3,"initial":{"p":11,"shadow":11,"queue":[],"cursor":0,"failed":false},"seed":304,"difficulty":1,"par":7,"title":"留在原地","id":"6"},
+    {"n":5,"exit":4,"plate":5,"walls":[12,10,9,13],"delay":4,"initial":{"p":6,"shadow":6,"queue":[],"cursor":0,"failed":false},"seed":21,"difficulty":2,"par":9,"title":"空房间","id":"7"},
+    {"n":5,"exit":22,"plate":7,"walls":[17,4,11,16],"delay":4,"initial":{"p":8,"shadow":8,"queue":[],"cursor":0,"failed":false},"seed":56,"difficulty":2,"par":9,"title":"穿过长廊","id":"8"},
+    {"n":5,"exit":16,"plate":3,"walls":[6,15,14,5],"delay":4,"initial":{"p":1,"shadow":1,"queue":[],"cursor":0,"failed":false},"seed":305,"difficulty":2,"par":9,"title":"两条时间线","id":"9"}
   ],
   relay: [
     {"n":3,"initial":45,"seed":9,"difficulty":0,"par":2,"title":"熄灯之前","id":"1"},

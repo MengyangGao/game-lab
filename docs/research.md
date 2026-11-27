@@ -5,11 +5,11 @@
 | 参考机制 | 资料里观察到的玩法 | 本项目决策 |
 | --- | --- | --- |
 | 匣里流光 | 调整光束发射、反射路径，照射指定目标 | 匣里流光采用持续照射、固定发射端、可翻转镜面、感光器与接收器。 |
-| 溢彩画 | 为同色连通区域换色，并合并相邻颜色块 | 溢彩画以左上角为生长起点，配合图案和最短步提示。 |
+| 溢彩画 | 为同色连通区域换色，并合并相邻颜色块 | 任选同色区域换色，合并相邻同色区域，在限步内涂成目标色。 [玩法说明](https://wuthering.gg/zh-Hans/guide/adventure/overflowing-palette) [换色实机](https://www.youtube.com/watch?v=BiFah4QHR4o) |
 | 庸人的容器 | 把挡路的箱子推开，从可进入的一侧救出被困目标 | 庸人的容器保留推而不可拉、开辟营救路线，用抽象的星形终点表示救援点。 |
 | 枘凿六合及 Remake | 原版以旋转匹配目标轮廓；Remake 要补充方块并吻合投影 | 枘凿六合·Remake采用逐层填充、固定锚块、三个可实时校准的投影。 |
 | 梦境拼图 | 将散落画片组合成完整画面 | 梦境拼图采用自绘装饰画，可交换或旋转图块。 |
-| 黄金替罪羊 | 已执行的指令会由过去的自己重演，必须安排两者的位置和时机 | 黄金替罪羊用延迟队列、压力开关和避免相撞的目标模拟时间规划。 |
+| 黄金替罪羊 | 已执行的指令会由过去的自己重演，必须安排两者的位置和时机 | 记录开局的一段动作，由回声逐步回放，回放结束后停在当前格。玩家需在回声踩住开关时抵达出口。 [实机攻略](https://www.youtube.com/watch?v=336CMN7hcX4) |
 
 - 崩铁玩法核对覆盖工造司光路、庙趣满堂、庸人的容器、匹诺康尼与黄金替罪羊。活动视频同页也展示大衍万象的图案复位和码放货物，可分别进一步抽象成位置置换、装箱约束。《寻径指津》的批量指令和梦境迷钟的移动、旋转、镜像路径也适合单独设计。差分宇宙实机展示罗盘、限时躲避、捕捉与打罐子，本轮选用无计时的逻辑玩法。 [匣里流光攻略](https://www.hoyolab.com/article/18738699) [庙趣满堂实机](https://www.bilibili.com/video/BV1UBxpeiEUR/) [庸人的容器攻略](https://www.taptap.cn/moment/401803766359130582) [匹诺康尼实机](https://www.youtube.com/watch?v=T3AB6qWPf8s) [黄金替罪羊实机](https://www.youtube.com/watch?v=336CMN7hcX4) [差分宇宙实机](https://www.bilibili.com/video/BV1VLghe8Ehm/)
 - 鸣潮的配色连通和能量矩阵可独立成局。电池门禁重在携带、配色、开门顺序，信号终端是配对连线，约束与画布染色不同。当前优先配色，信号走线可单独扩展。 [溢彩画实机](https://www.bilibili.com/video/BV1jFZGYyEF1/) [电池攻略](https://www.gamersky.com/handbook/202405/1750236_16.shtml) [信号与探索攻略](https://wutheringwaves.gg/exploration-guide/) [能量矩阵实机](https://www.youtube.com/watch?v=JMsHt-eMHug)

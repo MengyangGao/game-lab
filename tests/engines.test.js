@@ -23,7 +23,7 @@ const assert = {
 
 const games = [
   ['mirror', mirror, [[2, 2], [3, 3], [4, 4]], 120],
-  ['flood', flood, [[2, 3], [4, 5], [6, 9]], 120],
+  ['flood', flood, [[2, 3], [4, 5], [5, 7]], 120],
   ['relay', relay, [[2, 2], [3, 4], [5, 6]], 120],
   ['crate', crate, [[3, 5], [6, 8], [9, 13]], 25],
   ['echo', echo, [[3, 5], [6, 8], [9, 13]], 25],
@@ -63,7 +63,8 @@ for (const [name, engine, bands, samples] of games) {
         assert.deepEqual(engine.generate(seed, tier), level);
         verify(engine, level, level.initial, level.par);
         const [action] = engine.actions(level, level.initial);
-        verify(engine, level, engine.reduce(level, level.initial, action));
+        const advanced = engine.reduce(level, level.initial, action);
+        if (name !== 'echo' || engine.solve(level, advanced)) verify(engine, level, advanced);
       }
     }
   });
@@ -80,13 +81,39 @@ test('mirror requires a live receiver and every sensor', () => {
   assert.equal(mirror.reduce(level, 0, {type: 'rotate', i: 1}), 0);
 });
 
-test('flood does not absorb diagonal cells and gives an independently known optimum', () => {
-  const level = {n: 2, colors: 3, tiles: [0, 1, 2, 0]};
-  const initial = {region: 1, color: 0};
-  assert.equal(flood.expand(level, 1, 0), 1);
-  assert.equal(flood.reduce(level, initial, {type: 'paint', color: 1}).region, 3);
-  assert.equal(flood.reduce(level, initial, {type: 'paint', color: 9}), initial);
-  verify(flood, level, initial, 3);
+test('flood starts at any region and targets a specified color', () => {
+  const level = {n: 2, colors: 3, target: 0};
+  const initial = '0120';
+  assert.equal(flood.regionAt(level, initial, 0), 1);
+  assert.equal(flood.reduce(level, initial, {type: 'paint', i: 2, color: 0}), '0100');
+  assert.equal(flood.reduce(level, initial, {type: 'paint', i: 0, color: 9}), initial);
+  assert.equal(flood.won(level, '1111'), false);
+  verify(flood, level, initial, 2);
+});
+
+test('flood optimized search matches unrestricted search on all 2×2 boards', () => {
+  const level = {n: 2, colors: 3, target: 0};
+  const queue = [{state: '0000', depth: 0}];
+  // Use forward search from each input because some merges cannot be reversed.
+  for (let i = 0; i < 81; i++) {
+    const initial = i.toString(3).padStart(4, '0');
+    queue.splice(0, queue.length, {state: initial, depth: 0});
+    const seen = new Set([initial]);
+    for (let index = 0; index < queue.length; index++) {
+      const {state, depth} = queue[index];
+      if (flood.won(level, state)) {
+        assert.equal(flood.solve(level, initial).length, depth);
+        break;
+      }
+      for (const action of flood.actions(level, state)) {
+        const next = flood.reduce(level, state, action);
+        if (!seen.has(next)) {
+          seen.add(next);
+          queue.push({state: next, depth: depth + 1});
+        }
+      }
+    }
+  }
 });
 
 test('relay has orthogonal neighbors, reversible moves and unreachable states', () => {
@@ -110,15 +137,22 @@ test('crate pushes one crate and respects corners and walls', () => {
   assert.equal(crate.reduce(level, {p: 4, boxes: []}, {type: 'jump'}).p, 4);
 });
 
-test('echo replays directions after its delay and refuses collisions', () => {
+test('echo replays a fixed tape, stops, and detects collisions', () => {
   const level = {n: 4, walls: [], delay: 2, exit: 3, plate: 1};
-  let state = {p: 0, shadow: 0, queue: []};
+  let state = {p: 0, shadow: 0, queue: [], cursor: 0, failed: false};
   const right = {type: 'move', direction: 'right'};
   verify(echo, level, state, 3);
   state = echo.reduce(level, echo.reduce(level, state, right), right);
   assert.equal(state.shadow, 0);
-  assert.deepEqual(echo.reduce(level, state, right), {p: 3, shadow: 1, queue: ['right','right']});
-  assert.equal(echo.reduce(level, state, {type: 'move', direction: 'left'}), state);
+  const collision = echo.reduce(level, state, {type: 'move', direction: 'left'});
+  assert.equal(collision.failed, true);
+  assert.equal(echo.solve(level, collision), null);
+  state = echo.reduce(level, state, right);
+  assert.deepEqual(state, {p: 3, shadow: 1, queue: ['right','right'], cursor: 1, failed: false});
+  const down = {type: 'move', direction: 'down'};
+  state = echo.reduce(level, echo.reduce(level, state, down), down);
+  assert.equal(state.shadow, 2);
+  assert.equal(state.cursor, 2);
 });
 
 test('voxel projections use orthogonal axes and preserve fixed voxels', () => {

@@ -1,6 +1,8 @@
 import {games} from './views.js';
 import {campaign} from './campaign.js';
 import {readSave, writeSave} from './storage.js';
+import {connectGestures, playMotion} from './motion.js';
+import {directions, step} from './games/common.js';
 
 const app = document.querySelector('#app');
 const settings = document.querySelector('#settings');
@@ -12,6 +14,7 @@ let current;
 let hint = 0;
 let hintAction;
 let selected = null;
+let modelView = 0;
 let installPrompt;
 
 function save() {
@@ -57,6 +60,7 @@ function seed() {
 
 function route() {
   selected = null;
+  modelView = 0;
   hint = 0;
   hintAction = null;
   const [id, selection, tier, code] = location.hash.slice(1).split('/');
@@ -89,20 +93,25 @@ function play(refocus, announcement) {
     ? (hintAction ? game.clue(level, hintAction) : '从当前局面无法到达目标。可以撤销几步或重置。') : '';
   const next = random ? `#${id}/random/${level.difficulty}/${seed()}` : Number(level.id) < 9 ? `#${id}/${Number(level.id) + 1}` : `#${id}/random/0/${seed()}`;
   const [filled, all] = id === 'flood' ? game.engine.coverage(level, state) : [];
-  const progress = id === 'flood' ? ` · 色域 ${filled}/${all}` : '';
+  const remaining = level.par + 1 - moves;
+  const limited = id === 'flood';
+  const failed = state.failed || (limited && remaining <= 0 && !solved);
+  const failure = state.failed ? '撞上了回声。撤销一步，再试一条路线。' : '颜料用完了。撤销一步再试。';
+  const measure = limited ? `颜料余量 <strong>${Math.max(remaining, 0)}</strong> · 目标色 ${filled}/${all}`
+    : `<strong>${moves}</strong> 步 <span>·</span> 最少 ${level.par} 步`;
   app.innerHTML = `<div class="game-nav"><a href="#">全部实验室</a><span>/</span><span>${game.title}</span></div>
   <div class="workbench ${id}">
-    <section class="play-panel" aria-labelledby="game-title">
-      <div class="game-heading"><div><div class="game-kicker">${game.english}</div><h1 id="game-title" tabindex="-1">${level.title}</h1></div><span class="progress-pill">${difficulties[level.difficulty]}</span></div>
+    <section class="play-panel ${solved ? 'cleared' : failed ? 'failed' : ''}" aria-labelledby="game-title">
+      <div class="game-heading"><div><div class="game-kicker">${game.title}</div><h1 id="game-title" tabindex="-1">${level.title}</h1></div><span class="progress-pill">${difficulties[level.difficulty]}</span></div>
       <p class="rules">${game.rule}</p>
-      <div class="board-area">${game.draw(level, state, false, hint > 1 ? hintAction : null, selected)}</div>
-      <div class="stats"><strong>${moves}</strong> 步 · 最少 ${level.par} 步${progress}${Number.isInteger(data.best[slot]) ? ` · 最佳 ${data.best[slot]} 步` : ''}</div>
+      <div class="board-area">${game.draw(level, state, false, hint > 1 ? hintAction : null, selected, modelView)}</div>
+      <div class="stats">${limited ? `<span class="steps"><strong>${moves}</strong> 步</span> <span>·</span> ` : ''}${measure}${Number.isInteger(data.best[slot]) ? ` · 最佳 ${data.best[slot]} 步` : ''}</div>
       <div class="controls">
         <button class="quiet" data-command="undo" ${moves ? '' : 'disabled'}>撤销</button>
         <button class="quiet" data-command="reset" ${moves ? '' : 'disabled'}>重置</button>
-        <button class="quiet" data-command="hint" ${solved || (hint === 2 && !hintAction) ? 'disabled' : ''}>${['提示', '标出位置', hintAction ? '执行提示' : '无可用提示'][hint]}</button>
+        <button class="quiet" data-command="hint" ${solved || failed || (hint === 2 && !hintAction) ? 'disabled' : ''}>${['提示', '标出位置', hintAction ? '执行提示' : '无可用提示'][hint]}</button>
       </div>
-      <div class="feedback" role="status">${solved ? `<strong>实验完成！</strong><a class="primary" href="${next}">${random ? '再来一题' : '下一题'}</a>` : hintText || announcement || ''}</div>
+      <div class="feedback" role="status">${solved ? `<strong>实验完成！</strong><a class="primary" href="${next}">${random ? '再来一题' : '下一题'}</a>` : failed ? failure : hintText || announcement || ''}</div>
     </section>
     <aside class="level-panel" aria-label="选择关卡">
       <h2>关卡选择</h2>
@@ -114,7 +123,7 @@ function play(refocus, announcement) {
       <form id="random-form"><label for="difficulty">随机实验</label><select id="difficulty">
       ${difficulties.map((label, i) => `<option value="${i}" ${i === level.difficulty ? 'selected' : ''}>${label}</option>`).join('')}</select>
       <button class="primary">生成新关卡</button></form>
-      <p class="keyboard">${game.movement ? '方向键移动，空格等待（黄金替罪羊）。' : 'Tab 切换控件，Enter 或空格操作。'}</p>
+      <p class="keyboard">${game.movement ? '滑动棋盘、点相邻格或用方向键移动。' : id === 'mosaic' ? '拖动画片或依次选两格。' : 'Tab 切换控件，Enter 或空格操作。'}</p>
     </aside>
   </div>`;
   if (refocus) {
@@ -130,7 +139,7 @@ function update(action, refocus) {
   if (action === 'undo') history.pop();
   else if (action === 'reset') history.length = 0;
   else {
-    if (game.engine.won(level, state)) return;
+    if (state.failed || game.engine.won(level, state) || (current.id === 'flood' && history.length >= level.par + 1)) return;
     const next = game.engine.reduce(level, state, action);
     if (next === state) {
       if (game.movement) play(refocus, '这一步无法移动。');
@@ -139,26 +148,37 @@ function update(action, refocus) {
     history.push(next);
     if (!random && game.engine.won(level, next)) data.best[slot] = Math.min(data.best[slot] ?? Infinity, history.length);
   }
-  if (action === 'undo' || action === 'reset' || action.type === 'swap') selected = null;
+  if (action === 'undo' || action === 'reset' || action.type === 'swap' || action.type === 'paint') selected = null;
   data.sessions[slot] = {identity, history};
   hint = 0;
   hintAction = null;
   save();
   play(refocus, action === 'undo' ? '已撤销一步。' : action === 'reset' ? '已重置关卡。' : '');
-  if (typeof action !== 'object' || data.preferences.motion || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const effect = {
-    rotate: '.beam', paint: '.pigment', toggle: `[data-cell="${action.i}"]`,
-    move: '.walker', cube: '[data-cube="' + action.i + '"]',
-    swap: `[data-piece="${action.j}"]`, turn: `[data-piece="${action.i}"]`
-  }[action.type];
-  app.querySelector(effect)?.animate([{opacity: .55}, {opacity: 1}], {duration: 220, easing: 'ease-out'});
+  if (typeof action === 'object' && !data.preferences.motion && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    playMotion(app, level, state, history.at(-1) ?? level.initial, action);
+  }
 }
 
+const suppressClick = connectGestures(app, {
+  swap: (i, j) => update({type: 'swap', i, j}, `[data-piece="${j}"]`),
+  move: input => {
+    if (!current?.game.movement) return;
+    const {level, history} = current;
+    const {p} = history.at(-1) ?? level.initial;
+    const direction = typeof input === 'string' ? input : directions.find(key => step(p, level.n, key) === input);
+    if (direction) update({type: 'move', direction});
+  }
+});
+
 app.addEventListener('click', event => {
-  if (!current) return;
+  if (!current || suppressClick()) return;
   const button = event.target.closest('button');
   if (!button) return;
-  const {cell, color, command, cube, move, piece, turn} = button.dataset;
+  const {cell, color, command, cube, move, piece, turn, view} = button.dataset;
+  if (view !== undefined) {
+    modelView = (modelView + 1) % 4;
+    return play('[data-view]');
+  }
   if (move !== undefined) return update({type: 'move', direction: move}, `[data-move="${move}"]`);
   if (cube !== undefined) return update({type: 'cube', i: Number(cube)}, `[data-cube="${cube}"]`);
   if (piece !== undefined) {
@@ -169,8 +189,20 @@ app.addEventListener('click', event => {
     return play(focus);
   }
   if (turn !== undefined && selected !== null) return update({type: 'turn', i: selected}, '[data-turn]');
-  if (cell !== undefined) update(current.game.action(current.level.mirrors?.indexOf(Number(cell)) ?? Number(cell)), `[data-cell="${cell}"]`);
-  if (color !== undefined) update({type: 'paint', color: Number(color)}, `[data-color="${color}"]`);
+  if (cell !== undefined) {
+    const i = Number(cell);
+    const focus = `[data-cell="${cell}"]`;
+    if (current.id === 'flood') {
+      selected = i;
+      return play(focus);
+    }
+    return update(current.game.action(current.level.mirrors?.indexOf(i) ?? i), focus);
+  }
+  if (color !== undefined) {
+    const focus = `[data-color="${color}"]`;
+    if (selected === null) return play(focus, '先选一片要染色的区域。');
+    return update({type: 'paint', i: selected, color: Number(color)}, focus);
+  }
   if (command === 'hint') {
     const selector = '[data-command="hint"]';
     if (hint === 2 && hintAction) return update(hintAction, selector);

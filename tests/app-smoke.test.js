@@ -22,7 +22,7 @@ Object.defineProperties(globalThis, {
     setItem: (key, value) => values.set(key, value)
   }},
   crypto: {value: {getRandomValues: () => [123456]}, configurable: true},
-  matchMedia: {value: () => ({matches: false})}
+  matchMedia: {value: () => ({matches: true})}
 });
 
 if (!globalThis.window) globalThis.window = node('window');
@@ -77,3 +77,19 @@ route('#echo/random/2/42');
 check(app.innerHTML.includes('随机实验'), 'shareable random route');
 check(JSON.parse(values.get('puzzle-lab.v1')).last === '#echo/random/2/42', 'save records random route');
 console.log('PASS application routing, rendering, hints, progression and local persistence');
+
+const {readSave} = await import('../public/storage.js');
+values.set('puzzle-lab.v1', JSON.stringify({
+  version: 1,
+  best: {'flood/1': 2, 'echo/2': 5, 'mirror/1': 2},
+  sessions: {
+    'flood/1': {identity: '1', history: [{region: 1, color: 0}]},
+    'echo/2': {identity: '2', history: [{p: 1, shadow: 0, queue: ['right']}]},
+    'mirror/1': {identity: '1', history: [3]}
+  },
+  preferences: {motion: true}
+}));
+const migrated = readSave();
+check(migrated.best['mirror/1'] === 2 && migrated.sessions['mirror/1'].history[0] === 3, 'unchanged games keep progress');
+check(!migrated.sessions['flood/1'] && !migrated.sessions['echo/2'], 'obsolete rule sessions are discarded');
+check(migrated.preferences.motion, 'motion preference kept on upgrade');

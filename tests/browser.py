@@ -1,5 +1,6 @@
 """End-to-end checks for a running static Puzzle Lab instance."""
 import os
+import re
 from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
@@ -67,10 +68,41 @@ with sync_playwright() as playwright:
         expect(page.locator(".stats")).to_contain_text("0 步")
         no_overflow(page)
 
+    page.goto(f"{URL}#mosaic/2")
+    source = page.locator("[data-piece='0']")
+    target = page.locator("[data-piece='1']")
+    source.drag_to(target)
+    expect(page.locator(".stats")).to_contain_text("1 步")
+    expect(page.locator(".drag-ghost")).to_have_count(0)
+
+    page.goto(f"{URL}#crate/1")
+    page.locator("[data-floor='12']").click()
+    expect(page.locator("[data-token='player-token']")).to_have_attribute("data-position", "12")
+
+    page.goto(f"{URL}#echo/1")
+    for _ in range(3):
+        page.get_by_role("button", name="等待", exact=True).click()
+    expect(page.locator(".feedback")).to_contain_text("撞上了回声")
+    page.get_by_role("button", name="撤销").click()
+    expect(page.locator(".feedback")).not_to_contain_text("撞上了回声")
+
+    page.goto(f"{URL}#voxel/1")
+    position = page.locator(".isometric [data-voxel='0']").get_attribute("transform")
+    page.get_by_role("button", name="旋转模型视角").click()
+    expect(page.locator(".isometric [data-voxel='0']")).not_to_have_attribute("transform", position)
+    expect(page.locator(".stats")).to_contain_text("0 步")
+
     page.goto(f"{URL}#flood/1")
     page.locator("[data-color]").first.focus()
     page.keyboard.press("ArrowRight")
     expect(page.locator("[data-color]").nth(1)).to_be_focused()
+    page.locator(".pigment [data-cell='4']").click()
+    expect(page.locator(".pigment [data-cell='4']")).to_have_class(re.compile(r"filled"))
+    selected = page.locator(".pigment [data-cell='4']").get_attribute("class")
+    new_color = next(i for i in range(3) if f"c{i}" not in selected)
+    page.locator(f"[data-color='{new_color}']").click()
+    expect(page.locator(".stats")).to_contain_text("1 步")
+    expect(page.locator(".pigment [data-cell='4']")).to_have_class(re.compile(f"c{new_color}"))
     page.locator("#difficulty").select_option("2")
     page.get_by_role("button", name="生成新关卡").click()
     expect(page.locator("h1")).to_have_text("随机实验")
@@ -115,6 +147,20 @@ with sync_playwright() as playwright:
     phone.locator("[data-piece]").nth(2).tap()
     expect(phone.locator(".stats")).to_contain_text("2 步")
     screenshots(phone, "mobile-mosaic")
+    if browser_type == "chromium":
+        phone.goto(f"{URL}#mosaic/2")
+        picture = phone.locator(".picture")
+        picture.scroll_into_view_if_needed()
+        points = [phone.locator(f"[data-piece='{i}']").bounding_box() for i in (0, 1)]
+        start, end = [(p["x"] + p["width"] / 2, p["y"] + p["height"] / 2) for p in points]
+        cdp = mobile.new_cdp_session(phone)
+        cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": start[0], "y": start[1]}]})
+        for fraction in (.33, .66, 1):
+            x = start[0] + fraction * (end[0] - start[0])
+            y = start[1] + fraction * (end[1] - start[1])
+            cdp.send("Input.dispatchTouchEvent", {"type": "touchMove", "touchPoints": [{"x": x, "y": y}]})
+        cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []})
+        expect(phone.locator(".stats")).to_contain_text("1 步")
     mobile.close()
     browser.close()
-    print("PASS desktop/touch, seven games, saving, responsive widths, settings, and offline restart")
+    print("PASS desktop/touch, drag, paint, movement, model rotation, seven games, saving, layout, and offline restart")

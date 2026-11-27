@@ -18,7 +18,7 @@ function cell(i, name, body, interactive, classes = '') {
 }
 
 function optical(level, state, preview, hint) {
-  const {path, lit} = mirror.trace(level, state);
+  const {path, lit, won} = mirror.trace(level, state);
   const points = path.map(([r, c]) => {
     const clamp = i => Math.min(level.n, Math.max(0, i + .5));
     return `${clamp(c)},${clamp(r)}`;
@@ -31,22 +31,28 @@ function optical(level, state, preview, hint) {
         `<span class="mirror-piece ${flipped ? 'flipped' : ''}"></span>`, !preview, `mirror-cell ${hint?.i === m ? 'marked' : ''}`);
     }
     const kind = i === level.target ? 'target' : level.walls.includes(i) ? 'wall' : level.sensors.includes(i) ? 'sensor' : '';
-    return cell(i, preview ? '' : ({target: '接收器', sensor: lit.has(i) ? '感光器已点亮' : '感光器未点亮', wall: '墙壁'}[kind] ?? ''), kind === 'target' ? '◎' : kind === 'sensor' ? '◇' : '', false, `${kind} ${lit.has(i) ? 'lit' : ''}`);
+    return cell(i, preview ? '' : ({target: '接收器', sensor: lit.has(i) ? '感光器已点亮' : '感光器未点亮', wall: '墙壁'}[kind] ?? ''), kind === 'target' ? '◎' : kind === 'sensor' ? '◇' : '', false, `${kind} ${lit.has(i) || (kind === 'target' && won) ? 'lit' : ''}`);
   });
   return `<div class="board optical" style="--n:${level.n}">${marks}
-    <svg class="beam" viewBox="0 0 ${level.n} ${level.n}" aria-hidden="true"><polyline points="${points}"/><circle cx=".13" cy="${level.source[0] + .5}" r=".13"/></svg>
+    <svg class="beam" viewBox="0 0 ${level.n} ${level.n}" aria-hidden="true"><polyline class="beam-halo" points="${points}"/><polyline class="beam-core" pathLength="1" points="${points}"/><circle cx=".13" cy="${level.source[0] + .5}" r=".13"/></svg>
   </div>`;
 }
 
-function pigment(level, state, preview, hint) {
+function pigment(level, state, preview, hint, selected) {
+  const origin = hint?.i ?? selected;
+  const region = Number.isInteger(origin) ? flood.regionAt(level, state, origin) : 0;
   const marks = tiles(level, i => {
-    const filled = Boolean(state.region & bit(i));
-    const color = filled ? state.color : level.tiles[i];
-    return cell(i, preview ? '' : `第 ${Math.floor(i / level.n) + 1} 行第 ${i % level.n + 1} 列，${colorNames[color]}${filled ? '，已染色' : ''}`, symbols[color], false, `pigment-color c${color} ${filled ? 'filled' : ''}`);
+    const color = Number(state[i]);
+    const name = `第 ${Math.floor(i / level.n) + 1} 行第 ${i % level.n + 1} 列，${colorNames[color]}`;
+    const highlighted = Boolean(region & bit(i));
+    return cell(i, preview ? '' : name, `<span>${symbols[color]}</span>`, !preview,
+      `pigment-color c${color} ${highlighted ? 'filled' : ''}${hint?.i === i ? ' marked' : ''}`);
   });
   const palette = indices(level.colors).map(color =>
-    `<button type="button" class="swatch c${color} ${hint?.color === color ? 'marked' : ''}" data-color="${color}" aria-label="${colorNames[color]}" aria-pressed="${state.color === color}"><span>${symbols[color]}</span></button>`).join('');
-  return `<div class="board pigment" style="--n:${level.n}">${marks}</div>${preview ? '' : `<div class="palette" aria-label="调色盘">${palette}</div>`}`;
+    `<button type="button" class="swatch c${color} ${hint?.color === color ? 'marked' : ''}" data-color="${color}" aria-label="${colorNames[color]}" aria-pressed="${Number(state[selected]) === color}"><span>${symbols[color]}</span></button>`).join('');
+  return `<div class="board pigment" style="--n:${level.n}">${marks}</div>${preview ? '' :
+    `<div class="paint-tools"><div class="paint-target"><span>目标</span><span class="paint-chip c${level.target}">${colorNames[level.target]}</span></div>
+    <div class="palette" aria-label="调色盘">${palette}</div></div>`}`;
 }
 
 function switches(level, state, preview, hint) {
@@ -72,9 +78,9 @@ export const games = {
   flood: {
     engine: flood, title: '溢彩画', english: 'OVERFLOWING PALETTE', icon: '✿',
     tags: '顺序规划', summary: '选择下一抹颜色，把孤岛连成一片。',
-    rule: '从左上角的白色描边区域开始。选一种颜色，把区域染成该色，并吸收所有相连的同色格。让整幅画成为同一种颜色。',
-    tip: '关注已染区域接触到的颜色。先打开通往棋盘另一端的路线。',
-    clue: (_, action) => `试试调色盘中描边的${colorNames[action.color]}。选色前看看它能接通哪些色块。`,
+    rule: '先选任意一片相连的同色区域，再选颜料。相邻同色区域会合并；在步数用尽前染成指定颜色。',
+    tip: '先用一次换色合并多个相邻区域。最后再染成目标色往往更省步。',
+    clue: (_, action) => `选中描边区域，把这片色块染成${colorNames[action.color]}。`,
     draw: pigment
   },
   ...extraGames,

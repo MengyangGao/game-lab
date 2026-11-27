@@ -10,30 +10,36 @@ const directionClue = (_, action) => `试着${directionNames[action.direction] =
 
 function walkBoard(level, state, preview, hint, hasEcho) {
   const grid = indices(level.n ** 2).map(i => {
-    const item = level.walls.includes(i) ? ['wall', '', '墙'] : i === state.p ? ['walker', '●', '你']
-      : hasEcho && i === state.shadow ? ['echo-piece', '◉', '回声']
-      : state.boxes?.includes(i) ? ['crate-piece', '▧', '箱子']
-      : i === level.exit ? ['exit', '✦', '出口'] : i === level.plate ? ['plate', '◈', '回声开关'] : ['', '', '空地'];
-    return `<span class="cell ${item[0]}" ${preview ? '' : `role="img" aria-label="第 ${Math.floor(i / level.n) + 1} 行第 ${i % level.n + 1} 列，${item[2]}"`}>${item[1]}</span>`;
+    const wall = level.walls.includes(i);
+    const kind = wall ? 'wall' : i === level.exit ? 'exit' : i === level.plate ? 'plate' : '';
+    return `<span class="cell ${kind}" data-floor="${i}" aria-hidden="true">${kind === 'exit' ? '✦' : kind === 'plate' ? '◈' : ''}</span>`;
   }).join('');
-  const buttons = (hasEcho ? echo : crate).actions().map(({direction}) =>
-    `<button type="button" class="quiet ${hint?.direction === direction ? 'marked' : ''}" data-move="${direction}" aria-label="${directionNames[direction]}">${arrows[direction]}</button>`).join('');
-  const timeline = hasEcho ? `<p class="timeline">回放延迟 ${level.delay} 步 <strong>${state.queue.map(key => arrows[key]).join(' ') || '·'}</strong></p>` : '';
-  return `<div class="board walk-board" style="--n:${level.n}">${grid}</div>${preview ? '' : `${timeline}<div class="direction-pad">${buttons}</div>`}`;
+  const piece = (kind, i, name, mark) => `<span class="walk-token ${kind}" style="--row:${Math.floor(i / level.n)};--col:${i % level.n}" data-token="${kind}" data-position="${i}" role="img" aria-label="${name}，第 ${Math.floor(i / level.n) + 1} 行第 ${i % level.n + 1} 列">${mark}</span>`;
+  const playable = hasEcho ? echo.actions(level, state) : crate.actions();
+  const buttons = (hasEcho ? echo.actions() : playable).map(({direction}) =>
+    `<button type="button" class="quiet ${hint?.direction === direction ? 'marked' : ''}" data-move="${direction}" aria-label="${directionNames[direction]}" ${state.failed ? 'disabled' : ''}>${arrows[direction]}</button>`).join('');
+  const recording = state.queue?.length < level.delay;
+  const timeline = hasEcho ? `<div class="timeline"><span>${recording ? '记录脚步' : state.cursor < level.delay ? '回放脚步' : '回放结束'}</span><ol>${indices(level.delay).map(i =>
+    `<li class="${!recording && state.cursor === i ? 'current' : ''} ${!recording && state.cursor > i ? 'played' : ''}" aria-label="${directionNames[state.queue[i]] ?? '待记录'}">${arrows[state.queue[i]] ?? '·'}</li>`).join('')}</ol></div>` : '';
+  const tokens = [
+    ...(state.boxes ?? []).map(i => piece('crate-token', i, '木箱', '')),
+    ...(hasEcho && !recording ? [piece('echo-token', state.shadow, '回声', '◐')] : []),
+    piece('player-token', state.p, '你', '●')
+  ].join('');
+  return `<div class="board walk-board" style="--n:${level.n}" ${preview ? 'aria-hidden="true"' : 'aria-label="移动棋盘"'}>${grid}<div class="walk-tokens">${tokens}</div></div>${preview ? '' : `${timeline}<div class="direction-pad">${buttons}</div>`}`;
 }
 
-function isometric(level, state) {
-  const cubes = indices(level.count).sort((a, b) => {
-    const depth = i => Math.floor(i / 4) * 3 + (i % 2) + Math.floor(i / 2) % 2;
-    return depth(a) - depth(b);
-  }).map(i => {
+function isometric(level, state, view = 0) {
+  const cubes = indices(level.count).map(i => {
     const x = i % 2;
     const y = Math.floor(i / 2) % 2;
-    const z = Math.floor(i / 4);
+    const [u, v] = [[x, y], [1 - y, x], [1 - x, 1 - y], [y, 1 - x]][view];
+    return {i, x: u, y: v, z: Math.floor(i / 4)};
+  }).sort((a, b) => (a.z - b.z) * 3 + a.x + a.y - b.x - b.y).map(({i, x, y, z}) => {
     const dx = 50 + (x - y) * 19;
     const dy = 72 + (x + y) * 10 - z * 20;
     const filled = Boolean(state & bit(i));
-    return `<g transform="translate(${dx} ${dy})" class="${filled ? 'occupied' : 'empty'}">
+    return `<g transform="translate(${dx} ${dy})" data-voxel="${i}" class="${filled ? 'occupied' : 'empty'}">
       <path class="top" d="M0-10 19 0 0 10-19 0Z"/>
       <path class="left" d="M-19 0 0 10 0 30-19 20Z"/>
       <path class="right" d="M0 10 19 0 19 20 0 30Z"/>
@@ -42,7 +48,7 @@ function isometric(level, state) {
   return `<svg class="isometric" viewBox="0 12 100 112" aria-hidden="true">${cubes}</svg>`;
 }
 
-function volume(level, state, preview, hint) {
+function volume(level, state, preview, hint, _, view = 0) {
   const layers = indices(level.count / 4).map(z => {
     const slots = indices(4).map(index => {
       const i = z * 4 + index;
@@ -64,7 +70,7 @@ function volume(level, state, preview, hint) {
     return `<div class="layer"><small>${['顶视','正视','侧视'][i]}</small><div>${dots}</div></div>`;
   }).join('');
   if (preview) return isometric(level, state);
-  return `<div class="voxel-layout">${isometric(level, state)}<div class="voxel-layers">${layers}</div></div>
+  return `<div class="voxel-layout"><div class="voxel-model">${isometric(level, state, view)}<button type="button" class="quiet" data-view aria-label="旋转模型视角">旋转模型</button></div><div class="voxel-layers">${layers}</div></div>
     <div class="projections" aria-label="三面投影">${sides}</div>`;
 }
 
@@ -80,11 +86,19 @@ function art(level, tile = null, turns = 0) {
   const view = tile === null ? '0 0 120 120' : `${(tile % level.n) * size} ${Math.floor(tile / level.n) * size} ${size} ${size}`;
   return `<svg viewBox="${view}" style="transform:rotate(${90 * turns}deg)" aria-hidden="true">
     <rect width="120" height="120" fill="${dark}"/>
-    <circle cx="${82 - 4 * level.art}" cy="34" r="19" fill="${bright}"/>
-    <path d="M-8 91Q36 21 79 80T132 60V120H-8Z" fill="${mid}"/>
-    <path d="M-8 109Q22 67 53 98T129 81" stroke="${bright}" stroke-width="6" fill="none"/>
-    <path d="M12 38L24 34 27 19 32 32 47 35 33 40 26 52 22 42Z" fill="${bright}"/>
-    <circle cx="101" cy="102" r="5" fill="#fff"/><circle cx="53" cy="71" r="2" fill="#fff"/>
+    <circle cx="${82 - 4 * level.art}" cy="34" r="25" stroke="${bright}" stroke-opacity=".35" stroke-width=".65" fill="none"/>
+    <circle cx="${82 - 4 * level.art}" cy="34" r="18" fill="${bright}"/>
+    <path d="M-9 85 25 43 53 74 72 61 93 75 123 49V123H-9Z" fill="${mid}" fill-opacity=".55"/>
+    <path d="M-9 94 31 69 58 83 91 59 127 84V128H-9Z" fill="${mid}"/>
+    <path d="M-9 107Q26 92 49 96T97 79L127 84V126H-9Z" fill="${dark}" fill-opacity=".5"/>
+    <path d="M-8 110Q25 87 54 104T128 94" stroke="${bright}" stroke-width="4" fill="none"/>
+    <path d="M-8 116Q25 93 54 110T128 100" stroke="${bright}" stroke-opacity=".55" stroke-width=".9" fill="none"/>
+    <path d="M16 28 24 25 27 15 30 25 38 28 30 31 27 40 24 31Z" fill="${bright}"/>
+    <g fill="#fff" opacity=".72">
+      <circle cx="11" cy="14" r="1"/><circle cx="47" cy="19" r="1.2"/><circle cx="106" cy="16" r="1.4"/>
+      <circle cx="101" cy="28" r=".65"/><circle cx="56" cy="44" r="1.6"/><circle cx="10" cy="53" r="1"/>
+    </g>
+    <rect x="1.5" y="1.5" width="117" height="117" rx="4" fill="none" stroke="${bright}" stroke-width="1" stroke-opacity=".64"/>
   </svg>`;
 }
 
@@ -120,7 +134,7 @@ export const extraGames = {
   mosaic: {
     engine: mosaic, title: '梦境拼图', english: 'DREAM JIGSAW', tags: '图形拼合',
     summary: '换位、旋转，找回一张打散的图画。',
-    rule: '选中一张画片，再选择另一张可交换。按「旋转选中画片」顺时针转动 90°，拼成目标图。',
+    rule: '拖动画片到另一格即可交换，也可以依次点击两格。选中画片后可以旋转，把它们拼成目标图。',
     tip: '先找最大的连续轮廓，观察它是否能接到邻格。',
     clue: (_, {i, j}) => j === undefined ? `尝试旋转第 ${i + 1} 张画片。` : `试着交换描边的两张画片（位置 ${i + 1} 和 ${j + 1}）。`,
     draw: picture
@@ -128,7 +142,7 @@ export const extraGames = {
   echo: {
     engine: echo, title: '黄金替罪羊', english: 'GOLDEN SCAPEGOAT', tags: '时间规划',
     summary: '用过去的脚步，为现在的自己开门。',
-    rule: '回声从起点延迟几步复演指令。用 ◈ 标出的开关接住回声，同时让自己抵达星形出口。双方不能相撞或交换位置。',
+    rule: '前几步会被记录。回声随后从起点逐步复演这段动作，并停在最后一格。让它踩住开关，自己抵达出口。相撞后可撤销。',
     tip: '先想好一条去开关的路线，再安排现在的你怎样离开这条路线。',
     clue: directionClue,
     draw: (level, state, preview, hint) => walkBoard(level, state, preview, hint, true),
