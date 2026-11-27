@@ -75,30 +75,10 @@ function volume(level, state, preview, hint, _, view = 0) {
 }
 
 function art(level, tile = null, turns = 0) {
-  const colors = [
-    ['#241753','#af83ee','#ffbf80'], ['#103d48','#5ab49a','#ffbf80'],
-    ['#302659','#786ca6','#eea4c3'], ['#563051','#bd7395','#ffb373'],
-    ['#13384f','#648bad','#e8cc90'], ['#373061','#8877cd','#aee1ca'],
-    ['#4c2b57','#a76ba8','#f8c159'], ['#164a49','#6dba9b','#f5dcca']
-  ];
-  const [dark, mid, bright] = colors[level.art];
   const size = 120 / level.n;
   const view = tile === null ? '0 0 120 120' : `${(tile % level.n) * size} ${Math.floor(tile / level.n) * size} ${size} ${size}`;
   return `<svg viewBox="${view}" style="transform:rotate(${90 * turns}deg)" aria-hidden="true">
-    <rect width="120" height="120" fill="${dark}"/>
-    <circle cx="${82 - 4 * level.art}" cy="34" r="25" stroke="${bright}" stroke-opacity=".35" stroke-width=".65" fill="none"/>
-    <circle cx="${82 - 4 * level.art}" cy="34" r="18" fill="${bright}"/>
-    <path d="M-9 85 25 43 53 74 72 61 93 75 123 49V123H-9Z" fill="${mid}" fill-opacity=".55"/>
-    <path d="M-9 94 31 69 58 83 91 59 127 84V128H-9Z" fill="${mid}"/>
-    <path d="M-9 107Q26 92 49 96T97 79L127 84V126H-9Z" fill="${dark}" fill-opacity=".5"/>
-    <path d="M-8 110Q25 87 54 104T128 94" stroke="${bright}" stroke-width="4" fill="none"/>
-    <path d="M-8 116Q25 93 54 110T128 100" stroke="${bright}" stroke-opacity=".55" stroke-width=".9" fill="none"/>
-    <path d="M16 28 24 25 27 15 30 25 38 28 30 31 27 40 24 31Z" fill="${bright}"/>
-    <g fill="#fff" opacity=".72">
-      <circle cx="11" cy="14" r="1"/><circle cx="47" cy="19" r="1.2"/><circle cx="106" cy="16" r="1.4"/>
-      <circle cx="101" cy="28" r=".65"/><circle cx="56" cy="44" r="1.6"/><circle cx="10" cy="53" r="1"/>
-    </g>
-    <rect x="1.5" y="1.5" width="117" height="117" rx="4" fill="none" stroke="${bright}" stroke-width="1" stroke-opacity=".64"/>
+    <image href="./assets/tidal-glass.webp" width="120" height="120" class="glass-tone-${level.art}"/>
   </svg>`;
 }
 
@@ -115,7 +95,7 @@ function picture(level, state, preview, hint, selected) {
 
 export const extraGames = {
   crate: {
-    engine: crate, title: '庸人的容器', english: 'VESSEL OF MEDIOCRITY', tags: '移动规划',
+    engine: crate, title: '庸人的容器', english: 'VESSEL OF MEDIOCRITY', source: '崩坏：星穹铁道', tags: '移动规划',
     summary: '推开挡路的方箱，抵达营救点。',
     rule: '移动圆点，推开方箱，到达星形营救点。一次只能推一个箱子，箱子无法拉回。',
     tip: '从营救点往回找路线，留意箱子后面是否有空间站立。',
@@ -124,7 +104,7 @@ export const extraGames = {
     movement: true
   },
   voxel: {
-    engine: voxel, title: '枘凿六合·Remake', english: 'HEXANEXUS: REMAKE', tags: '立体投影',
+    engine: voxel, title: '枘凿六合·Remake', english: 'HEXANEXUS: REMAKE', source: '崩坏：星穹铁道', tags: '立体投影',
     summary: '填充体素，让三面投影同时吻合。',
     rule: '每层有四个位置，点击添加或移除方块。菱形方块固定。三个投影都需匹配：圆圈待填，叉号表示多填。',
     tip: '某处投影本应为空时，检查同一条视线上的所有层。',
@@ -132,7 +112,7 @@ export const extraGames = {
     draw: volume
   },
   mosaic: {
-    engine: mosaic, title: '梦境拼图', english: 'DREAM JIGSAW', tags: '图形拼合',
+    engine: mosaic, title: '梦境拼图', english: 'DREAM JIGSAW', source: '崩坏：星穹铁道', tags: '图形拼合',
     summary: '换位、旋转，找回一张打散的图画。',
     rule: '拖动画片到另一格即可交换，也可以依次点击两格。选中画片后可以旋转，把它们拼成目标图。',
     tip: '先找最大的连续轮廓，观察它是否能接到邻格。',
@@ -140,7 +120,7 @@ export const extraGames = {
     draw: picture
   },
   echo: {
-    engine: echo, title: '黄金替罪羊', english: 'GOLDEN SCAPEGOAT', tags: '时间规划',
+    engine: echo, title: '黄金替罪羊', english: 'GOLDEN SCAPEGOAT', source: '崩坏：星穹铁道', tags: '时间规划',
     summary: '用过去的脚步，为现在的自己开门。',
     rule: '前几步会被记录。回声随后从起点逐步复演这段动作，并停在最后一格。让它踩住开关，自己抵达出口。相撞后可撤销。',
     tip: '先想好一条去开关的路线，再安排现在的你怎样离开这条路线。',

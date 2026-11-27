@@ -6,6 +6,7 @@ import * as crate from '../public/games/crate.js';
 import * as echo from '../public/games/echo.js';
 import * as voxel from '../public/games/voxel.js';
 import * as mosaic from '../public/games/mosaic.js';
+import * as circuit from '../public/games/circuit.js';
 import {extraGames} from '../public/extra-views.js';
 import {campaign as snapshot} from '../public/campaign.js';
 
@@ -28,7 +29,8 @@ const games = [
   ['crate', crate, [[3, 5], [6, 8], [9, 13]], 25],
   ['echo', echo, [[3, 5], [6, 8], [9, 13]], 25],
   ['voxel', voxel, [[1, 2], [3, 4], [5, 6]], 25],
-  ['mosaic', mosaic, [[3, 5], [6, 9], [10, 14]], 25]
+  ['mosaic', mosaic, [[3, 5], [6, 9], [10, 14]], 25],
+  ['circuit', circuit, [[2,3], [3,4], [4,5]], 25]
 ];
 
 function verify(engine, level, state, expected) {
@@ -169,4 +171,13 @@ test('mosaic separates permutation from rotating tiles', () => {
   let state = restored;
   for (let i = 0; i < 4; i++) state = mosaic.reduce(level, state, {type: 'turn', i: 1});
   assert.deepEqual(state, restored);
+});
+
+test('relay network requires a powered path and respects inventory', () => {
+  const level = {n: 5, source: 0, targets: [4], sockets: [2, 20], reach: 2, capacity: 1};
+  const offPath = circuit.reduce(level, 0, {type: 'relay', i: 1});
+  assert.equal(circuit.won(level, offPath), false);
+  assert.equal(circuit.reduce(level, offPath, {type: 'relay', i: 0}), offPath);
+  assert.deepEqual(circuit.solve(level, offPath), [{type: 'relay', i: 1}, {type: 'relay', i: 0}]);
+  verify(circuit, level, offPath, 2);
 });

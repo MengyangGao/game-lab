@@ -34,15 +34,15 @@ function check(success, context) {
   if (!success) throw new Error(context);
 }
 
-const click = dataset => handlers.get('#app:click')({target: {closest: () => ({dataset})}});
+const click = dataset => handlers.get('#app:click')({target: {closest: selector => selector === 'button' ? {dataset} : null}});
 const command = name => click({command: name});
 const route = hash => {
   location.hash = hash;
   handlers.get('window:hashchange')();
 };
 
-check((app.innerHTML.match(/<article /g) ?? []).length === 7, 'home renders all seven games');
-for (const id of ['mirror', 'flood', 'relay', 'crate', 'echo', 'voxel', 'mosaic']) {
+check((app.innerHTML.match(/<article /g) ?? []).length === 8, 'home renders all eight games');
+for (const id of ['mirror', 'flood', 'relay', 'crate', 'echo', 'voxel', 'mosaic', 'circuit']) {
   route(`#${id}/1`);
   check(app.innerHTML.includes('0</strong> 步'), `initial view: ${id}`);
   command('hint');
@@ -56,6 +56,10 @@ for (const id of ['mirror', 'flood', 'relay', 'crate', 'echo', 'voxel', 'mosaic'
   check(app.innerHTML.includes('1</strong> 步'), `resume: ${id}`);
   command('undo');
   for (let i = 0; i < 16 && !app.innerHTML.includes('实验完成！'); i++) {
+    if (id === 'mirror' && app.innerHTML.includes('data-command="hint" disabled')) {
+      command('fire');
+      continue;
+    }
     command('hint');
     command('hint');
     command('hint');

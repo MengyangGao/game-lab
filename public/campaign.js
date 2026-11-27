@@ -22,6 +22,17 @@ export const campaign = {
     {"n":4,"colors":4,"target":1,"initial":"0120123133130012","seed":163,"difficulty":2,"par":5,"title":"暮色拼盘","id":"8"},
     {"n":4,"colors":4,"target":1,"initial":"0230200012310023","seed":855,"difficulty":2,"par":5,"title":"满幅渐染","id":"9"}
   ],
+  circuit: [
+    {"n":7,"source":21,"targets":[27],"sockets":[30,12,10,47,16,14,37,4],"reach":2.35,"capacity":3,"initial":0,"seed":12,"difficulty":0,"par":3,"title":"葛藤之间","id":"1"},
+    {"n":7,"source":21,"targets":[27],"sockets":[12,22,18,8,36,24,33,46],"reach":2.35,"capacity":3,"initial":0,"seed":68,"difficulty":0,"par":3,"title":"断开的潮线","id":"2"},
+    {"n":7,"source":21,"targets":[27],"sockets":[15,6,38,39,16,18,36,12],"reach":2.35,"capacity":3,"initial":0,"seed":219,"difficulty":0,"par":2,"title":"风化的石台","id":"3"},
+    {"n":7,"source":21,"targets":[13,41],"sockets":[10,27,43,37,18,42,30,17,1],"reach":2.35,"capacity":4,"initial":0,"seed":3,"difficulty":1,"par":4,"title":"两座灯标","id":"4"},
+    {"n":7,"source":21,"targets":[13,41],"sockets":[12,31,14,33,18,7,11,43,36],"reach":2.35,"capacity":4,"initial":0,"seed":81,"difficulty":1,"par":4,"title":"风口","id":"5"},
+    {"n":7,"source":21,"targets":[13,41],"sockets":[16,25,32,27,14,10,22,9,17],"reach":2.35,"capacity":4,"initial":0,"seed":267,"difficulty":1,"par":3,"title":"双向通路","id":"6"},
+    {"n":7,"source":21,"targets":[13,41],"sockets":[11,27,19,8,36,3,20,25,32,18],"reach":2.35,"capacity":5,"initial":0,"seed":14,"difficulty":2,"par":4,"title":"远雷","id":"7"},
+    {"n":7,"source":21,"targets":[13,41],"sockets":[33,30,16,29,42,19,1,2,38,46],"reach":2.35,"capacity":5,"initial":0,"seed":157,"difficulty":2,"par":4,"title":"分流","id":"8"},
+    {"n":7,"source":21,"targets":[13,41],"sockets":[16,35,3,39,2,24,32,17,37,27],"reach":2.35,"capacity":5,"initial":0,"seed":662,"difficulty":2,"par":4,"title":"雨停之前","id":"9"}
+  ],
   crate: [
     {"n":5,"exit":19,"walls":[14,24,16,22,2],"initial":{"p":11,"boxes":[17,18]},"seed":22,"difficulty":0,"par":4,"title":"出门之前","id":"1"},
     {"n":5,"exit":19,"walls":[14,24,5,8,3],"initial":{"p":16,"boxes":[17,18]},"seed":56,"difficulty":0,"par":5,"title":"窄巷","id":"2"},

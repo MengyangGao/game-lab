@@ -1,3 +1,4 @@
+import {circuitGame} from './circuit-view.js';
 import {extraGames} from './extra-views.js';
 import * as mirror from './games/mirror.js';
 import * as flood from './games/flood.js';
@@ -17,8 +18,9 @@ function cell(i, name, body, interactive, classes = '') {
     : `<span class="cell ${classes}"${name ? ` role="img" aria-label="${name}"` : ''}>${body}</span>`;
 }
 
-function optical(level, state, preview, hint) {
+function optical(level, state, preview, hint, _, view, shot = false) {
   const {path, lit, won} = mirror.trace(level, state);
+  const energized = preview || shot;
   const points = path.map(([r, c]) => {
     const clamp = i => Math.min(level.n, Math.max(0, i + .5));
     return `${clamp(c)},${clamp(r)}`;
@@ -31,10 +33,10 @@ function optical(level, state, preview, hint) {
         `<span class="mirror-piece ${flipped ? 'flipped' : ''}"></span>`, !preview, `mirror-cell ${hint?.i === m ? 'marked' : ''}`);
     }
     const kind = i === level.target ? 'target' : level.walls.includes(i) ? 'wall' : level.sensors.includes(i) ? 'sensor' : '';
-    return cell(i, preview ? '' : ({target: '接收器', sensor: lit.has(i) ? '感光器已点亮' : '感光器未点亮', wall: '墙壁'}[kind] ?? ''), kind === 'target' ? '◎' : kind === 'sensor' ? '◇' : '', false, `${kind} ${lit.has(i) || (kind === 'target' && won) ? 'lit' : ''}`);
+    return cell(i, preview ? '' : ({target: '接收器', sensor: energized && lit.has(i) ? '感光器已点亮' : '感光器未点亮', wall: '墙壁'}[kind] ?? ''), kind === 'target' ? '◎' : kind === 'sensor' ? '◇' : '', false, `${kind} ${energized && (lit.has(i) || (kind === 'target' && won)) ? 'lit' : ''}`);
   });
   return `<div class="board optical" style="--n:${level.n}">${marks}
-    <svg class="beam" viewBox="0 0 ${level.n} ${level.n}" aria-hidden="true"><polyline class="beam-halo" points="${points}"/><polyline class="beam-core" pathLength="1" points="${points}"/><circle cx=".13" cy="${level.source[0] + .5}" r=".13"/></svg>
+    <svg class="beam ${energized ? 'fired' : 'guide'}" viewBox="0 0 ${level.n} ${level.n}" aria-hidden="true"><polyline class="beam-halo" points="${points}"/><polyline class="beam-core" pathLength="1" points="${points}"/><circle cx=".13" cy="${level.source[0] + .5}" r=".13"/></svg>
   </div>`;
 }
 
@@ -65,9 +67,9 @@ function switches(level, state, preview, hint) {
 
 export const games = {
   mirror: {
-    engine: mirror, title: '匣里流光', english: 'LUMINFLUX PYXIS', icon: '◈',
+    engine: mirror, title: '匣里流光', english: 'LUMINFLUX PYXIS', source: '崩坏：星穹铁道',
     tags: '空间推理', summary: '转动镜面，让一束光穿过暗室。',
-    rule: '点击银色镜面改变反射方向。让光束先经过所有菱形感光器，再抵达圆形接收器。',
+    rule: '转动镜面校准光路。按试射发出光束，依次点亮菱形感光器和圆形接收器。',
     tip: '先找光束离开棋盘或撞墙前遇到的最后一面镜子。',
     clue: (level, action) => {
       const i = level.mirrors[action.i];
@@ -76,16 +78,17 @@ export const games = {
     action: i => ({type: 'rotate', i}), draw: optical
   },
   flood: {
-    engine: flood, title: '溢彩画', english: 'OVERFLOWING PALETTE', icon: '✿',
+    engine: flood, title: '溢彩画', english: 'OVERFLOWING PALETTE', source: '鸣潮',
     tags: '顺序规划', summary: '选择下一抹颜色，把孤岛连成一片。',
     rule: '先选任意一片相连的同色区域，再选颜料。相邻同色区域会合并；在步数用尽前染成指定颜色。',
     tip: '先用一次换色合并多个相邻区域。最后再染成目标色往往更省步。',
     clue: (_, action) => `选中描边区域，把这片色块染成${colorNames[action.color]}。`,
     draw: pigment
   },
+  circuit: circuitGame,
   ...extraGames,
   relay: {
-    engine: relay, title: '熄灯', english: 'LIGHTS OUT', icon: '✦',
+    engine: relay, title: '熄灯', english: 'LIGHTS OUT', source: '经典逻辑谜题',
     tags: '联动逻辑', summary: '轻触一盏灯，改变周围四邻的状态。',
     rule: '点击任意格，会同时翻转这盏灯和它上下左右相邻的灯。把所有灯熄灭即可过关。',
     tip: '同一格点击两次会抵消。试着先考虑能同时处理几盏灯的位置。',

@@ -1,9 +1,9 @@
 const prefix = `puzzle-lab:${self.registration.scope}:`;
-const cacheName = prefix + 'v5';
+const cacheName = prefix + 'v6';
 const files = [
-  './', './index.html', './style.css', './app.js', './campaign.js', './views.js', './extra-views.js', './storage.js', './motion.js', './stage.css',
+  './', './index.html', './style.css', './app.js', './campaign.js', './views.js', './extra-views.js', './storage.js', './motion.js', './circuit-view.js', './assets/optical-archive.webp', './assets/tidal-glass.webp',
   './games/common.js', './games/mirror.js', './games/flood.js', './games/switch.js',
-  './games/crate.js', './games/echo.js', './games/voxel.js', './games/mosaic.js',
+  './games/crate.js', './games/echo.js', './games/voxel.js', './games/mosaic.js', './games/circuit.js',
   './manifest.webmanifest', './icon-192.png', './icon-512.png'
 ];
 

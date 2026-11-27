@@ -30,26 +30,29 @@ function home() {
   const last = /^#[a-z]+\/(?:[1-9]|random\/[0-2]\/\d{1,10})$/.test(data.last)
     && gameIds.includes(data.last.split('/')[0].slice(1)) ? data.last : null;
   const totalLevels = Object.values(campaign).reduce((sum, levels) => sum + levels.length, 0);
-  app.innerHTML = `<section class="hero"><div class="hero-copy">
-    <span class="eyebrow"><span>✦</span> 休闲益智合集</span>
-    <h1>留一点时间<br>给<span>好奇心。</span></h1>
-    <p>从一束光、一抹颜色或一盏灯开始。<br>几分钟一题，想玩就打开。</p>
-    <a class="primary" href="${last || '#mirror/1'}">${last ? '继续上次的谜题' : '开始第一题'}</a>
-  </div><div class="hero-art" aria-hidden="true">
-    <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
-    <div class="art-tile art-purple">✦</div><div class="art-tile art-orange">◒</div>
-    <div class="art-tile art-green">◈</div><i class="art-spark">✦</i><i class="art-dot"></i>
-  </div></section>
-  <section aria-labelledby="collection"><div class="section-heading">
-    <div><h2 id="collection">选择一间实验室</h2><p>每种玩法都有固定关卡和随机挑战。</p></div>
+  app.innerHTML = `<section class="hero">
+    <img class="hero-image" src="./assets/optical-archive.webp" alt="" fetchpriority="high">
+    <div class="hero-copy">
+      <p class="hero-kicker">PUZZLE LAB</p>
+      <h1>机关档案馆</h1>
+      <p>拆解光路、色彩与空间。<br>来自星穹铁道、鸣潮、原神的机关玩法研究。</p>
+      <div class="hero-actions">
+        <a class="primary" href="${last || '#mirror/1'}">${last ? '继续游玩' : '开始游玩'}</a>
+        <a class="quiet" href="#collection" data-collection>浏览机关</a>
+      </div>
+    </div>
+  </section>
+  <section aria-labelledby="collection" class="archive"><div class="section-heading">
+    <h2 id="collection" tabindex="-1">机关目录</h2>
     <span class="progress-pill">已完成 ${total} / ${totalLevels}</span>
   </div><div class="cards">${Object.entries(games).map(([id, game]) => {
     const sample = campaign[id][4];
-    return `<article class="card ${id}"><a href="#${id}/${campaign[id].find(level => data.best[`${id}/${level.id}`] === undefined)?.id ?? 1}">
+    const next = campaign[id].find(level => data.best[`${id}/${level.id}`] === undefined)?.id ?? 1;
+    return `<article class="card ${id}"><a href="#${id}/${next}">
       <div class="card-preview" aria-hidden="true">${game.draw(sample, sample.initial, true)}</div>
-      <div class="card-info"><div class="card-meta"><span>${game.english}</span><span>${game.tags}</span></div>
+      <div class="card-info"><div class="card-meta"><span>${game.source}</span><span>${game.tags}</span></div>
       <h3>${game.title}</h3><p>${game.summary}</p>
-      <div class="card-bottom"><span>已完成 ${done(id)} / 9</span><span class="card-enter">进入实验室</span></div></div>
+      <div class="card-bottom"><span>${done(id)} / ${campaign[id].length} 已完成</span><span class="card-enter">游玩</span></div></div>
     </a></article>`;
   }).join('')}</div></section>`;
 }
@@ -67,6 +70,7 @@ function route() {
   current = null;
   if (!gameIds.includes(id)) {
     home();
+    if (id === 'collection') app.querySelector('#collection')?.focus();
     return;
   }
   const game = games[id];
@@ -77,7 +81,9 @@ function route() {
   const identity = random ? `${tier}/${code}` : level.id;
   const record = data.sessions[slot];
   const history = record?.identity === identity && Array.isArray(record.history) ? record.history : [];
-  current = {id, game, level, slot, identity, history, random};
+  const shot = id === 'mirror' && record?.identity === identity &&
+    Boolean(record.shot ?? (Number.isInteger(data.best[slot]) && game.engine.won(level, history.at(-1) ?? level.initial)));
+  current = {id, game, level, slot, identity, history, random, shot};
   data.last = random ? `#${id}/random/${identity}` : `#${id}/${level.id}`;
   save();
   play();
@@ -88,10 +94,11 @@ function play(refocus, announcement) {
   const {id, game, level, history, random, slot} = current;
   const state = history.at(-1) ?? level.initial;
   const moves = history.length;
-  const solved = game.engine.won(level, state);
+  const aligned = game.engine.won(level, state);
+  const solved = aligned && (id !== 'mirror' || current.shot);
   const hintText = hint === 1 ? game.tip : hint === 2
     ? (hintAction ? game.clue(level, hintAction) : '从当前局面无法到达目标。可以撤销几步或重置。') : '';
-  const next = random ? `#${id}/random/${level.difficulty}/${seed()}` : Number(level.id) < 9 ? `#${id}/${Number(level.id) + 1}` : `#${id}/random/0/${seed()}`;
+  const next = random ? `#${id}/random/${level.difficulty}/${seed()}` : Number(level.id) < campaign[id].length ? `#${id}/${Number(level.id) + 1}` : `#${id}/random/0/${seed()}`;
   const [filled, all] = id === 'flood' ? game.engine.coverage(level, state) : [];
   const remaining = level.par + 1 - moves;
   const limited = id === 'flood';
@@ -99,17 +106,18 @@ function play(refocus, announcement) {
   const failure = state.failed ? '撞上了回声。撤销一步，再试一条路线。' : '颜料用完了。撤销一步再试。';
   const measure = limited ? `颜料余量 <strong>${Math.max(remaining, 0)}</strong> · 目标色 ${filled}/${all}`
     : `<strong>${moves}</strong> 步 <span>·</span> 最少 ${level.par} 步`;
-  app.innerHTML = `<div class="game-nav"><a href="#">全部实验室</a><span>/</span><span>${game.title}</span></div>
+  app.innerHTML = `<div class="game-nav"><a href="#">机关目录</a><span>/</span><span>${game.source}</span><span>/</span><span>${game.title}</span></div>
   <div class="workbench ${id}">
     <section class="play-panel ${solved ? 'cleared' : failed ? 'failed' : ''}" aria-labelledby="game-title">
-      <div class="game-heading"><div><div class="game-kicker">${game.title}</div><h1 id="game-title" tabindex="-1">${level.title}</h1></div><span class="progress-pill">${difficulties[level.difficulty]}</span></div>
+      <div class="game-heading"><div><div class="game-kicker">${game.title} <span>${game.english}</span></div><h1 id="game-title" tabindex="-1">${level.title}</h1></div><span class="progress-pill">${difficulties[level.difficulty]}</span></div>
       <p class="rules">${game.rule}</p>
-      <div class="board-area">${game.draw(level, state, false, hint > 1 ? hintAction : null, selected, modelView)}</div>
+      <div class="board-area"><div class="board-content">${game.draw(level, state, false, hint > 1 ? hintAction : null, selected, modelView, current.shot)}</div></div>
       <div class="stats">${limited ? `<span class="steps"><strong>${moves}</strong> 步</span> <span>·</span> ` : ''}${measure}${Number.isInteger(data.best[slot]) ? ` · 最佳 ${data.best[slot]} 步` : ''}</div>
       <div class="controls">
+        ${id === 'mirror' ? '<button class="primary" data-command="fire">试射</button>' : ''}
         <button class="quiet" data-command="undo" ${moves ? '' : 'disabled'}>撤销</button>
         <button class="quiet" data-command="reset" ${moves ? '' : 'disabled'}>重置</button>
-        <button class="quiet" data-command="hint" ${solved || failed || (hint === 2 && !hintAction) ? 'disabled' : ''}>${['提示', '标出位置', hintAction ? '执行提示' : '无可用提示'][hint]}</button>
+        <button class="quiet" data-command="hint" ${aligned || failed || (hint === 2 && !hintAction) ? 'disabled' : ''}>${['提示', '标出位置', hintAction ? '执行提示' : '无可用提示'][hint]}</button>
       </div>
       <div class="feedback" role="status">${solved ? `<strong>实验完成！</strong><a class="primary" href="${next}">${random ? '再来一题' : '下一题'}</a>` : failed ? failure : hintText || announcement || ''}</div>
     </section>
@@ -128,27 +136,30 @@ function play(refocus, announcement) {
   </div>`;
   if (refocus) {
     const target = app.querySelector(refocus);
-    const fallback = app.querySelector('.feedback a') ?? app.querySelector('[data-cell], [data-color], [data-move], [data-cube], [data-piece]');
+    const fallback = app.querySelector('.feedback a') ?? app.querySelector('[data-cell], [data-color], [data-move], [data-cube], [data-piece], [data-relay]');
     (target?.disabled ? fallback : target)?.focus({preventScroll: true});
   }
 }
 
 function update(action, refocus) {
-  const {game, level, history, slot, identity, random} = current;
+  const {id, game, level, history, slot, identity, random} = current;
   const state = history.at(-1) ?? level.initial;
   if (action === 'undo') history.pop();
   else if (action === 'reset') history.length = 0;
   else {
-    if (state.failed || game.engine.won(level, state) || (current.id === 'flood' && history.length >= level.par + 1)) return;
+    if (state.failed || ((id !== 'mirror' || current.shot) && game.engine.won(level, state)) ||
+        (id === 'flood' && history.length >= level.par + 1)) return;
     const next = game.engine.reduce(level, state, action);
     if (next === state) {
       if (game.movement) play(refocus, '这一步无法移动。');
+      if (current.id === 'circuit') play(refocus, '没有可用的继电石。点击已放置的继电石可取回。');
       return;
     }
     history.push(next);
-    if (!random && game.engine.won(level, next)) data.best[slot] = Math.min(data.best[slot] ?? Infinity, history.length);
+    if (!random && id !== 'mirror' && game.engine.won(level, next)) data.best[slot] = Math.min(data.best[slot] ?? Infinity, history.length);
   }
   if (action === 'undo' || action === 'reset' || action.type === 'swap' || action.type === 'paint') selected = null;
+  current.shot = false;
   data.sessions[slot] = {identity, history};
   hint = 0;
   hintAction = null;
@@ -171,10 +182,17 @@ const suppressClick = connectGestures(app, {
 });
 
 app.addEventListener('click', event => {
+  const collection = event.target.closest?.('[data-collection]');
+  if (collection) {
+    event.preventDefault();
+    app.querySelector('#collection').focus();
+    return;
+  }
   if (!current) return;
   const button = event.target.closest('button');
   if (!button || (button.dataset.piece !== undefined && suppressClick())) return;
-  const {cell, color, command, cube, move, piece, turn, view} = button.dataset;
+  const {cell, color, command, cube, move, piece, turn, view, relay} = button.dataset;
+  if (relay !== undefined) return update({type: 'relay', i: Number(relay)}, `[data-relay="${relay}"]`);
   if (view !== undefined) {
     modelView = (modelView + 1) % 4;
     return play('[data-view]');
@@ -202,6 +220,23 @@ app.addEventListener('click', event => {
     const focus = `[data-color="${color}"]`;
     if (selected === null) return play(focus, '先选一片要染色的区域。');
     return update({type: 'paint', i: selected, color: Number(color)}, focus);
+  }
+  if (command === 'fire') {
+    const {id, game, level, history, slot, identity, random} = current;
+    if (id !== 'mirror') return;
+    const state = history.at(-1) ?? level.initial;
+    current.shot = true;
+    hint = 0;
+    hintAction = null;
+    const hit = game.engine.won(level, state);
+    if (hit && !random) data.best[slot] = Math.min(data.best[slot] ?? Infinity, history.length);
+    data.sessions[slot] = {identity, history, shot: true};
+    save();
+    play('[data-command="fire"]', hit ? '' : '接收端未校准。检查光束是否经过所有感光器。');
+    if (!data.preferences.motion && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      playMotion(app, level, state, state, {type: 'fire'});
+    }
+    return;
   }
   if (command === 'hint') {
     const selector = '[data-command="hint"]';

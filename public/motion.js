@@ -15,8 +15,11 @@ export function playMotion(root, level, before, after, action) {
       animate(`[data-cell="${mirror}"] .mirror-piece`, [
         {transform: `rotate(${-turned}deg)`}, {transform: `rotate(${turned}deg)`}
       ]);
-      animate('.beam-core', [{strokeDashoffset: '1'}, {strokeDashoffset: '0'}], 360);
-      animate('.beam-halo', [{opacity: 0}, {opacity: .55}], 410);
+      break;
+    }
+    case 'fire': {
+      animate('.beam-core', [{strokeDashoffset: '1'}, {strokeDashoffset: '0'}], 560);
+      animate('.beam-halo', [{opacity: 0}, {opacity: .55}], 610);
       break;
     }
     case 'paint': {
@@ -55,6 +58,10 @@ export function playMotion(root, level, before, after, action) {
       for (let i = 0; i < level.n ** 2; i++) {
         if ((before ^ after) & (1 << i)) animate(`[data-cell="${i}"]`, [{filter: 'brightness(.72)'}, {filter: 'none'}], 280);
       }
+      break;
+    case 'relay':
+      animate(`[data-relay="${action.i}"]`, [{scale: '.84'}, {scale: '1'}], 220);
+      animate('.circuit-wires', [{opacity: .2}, {opacity: 1}], 330);
       break;
     case 'cube':
       animate(`[data-cube="${action.i}"]`, [{scale: '.8'}, {scale: '1'}], 200);

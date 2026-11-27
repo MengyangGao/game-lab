@@ -1,4 +1,4 @@
-"""Verify the browser application and publish seven README screenshots locally."""
+"""Verify the browser application and publish README screenshots locally."""
 import os
 from pathlib import Path
 import re
@@ -19,6 +19,7 @@ GAMES = {
     "mosaic": "梦境拼图",
     "echo": "黄金替罪羊",
     "relay": "熄灯",
+    "circuit": "继电石",
 }
 START = "<!-- screenshot-gallery:start -->"
 END = "<!-- screenshot-gallery:end -->"
@@ -53,7 +54,7 @@ def main():
         shots = ROOT / "docs" / "screenshots"
         files = {game: Path(scratch) / f"desktop-{game}.png" for game in GAMES}
         if not all(path.is_file() for path in files.values()):
-            raise SystemExit("Browser verification passed but did not produce all seven screenshots.")
+            raise SystemExit("Browser verification passed but did not produce all expected screenshots.")
         shots.mkdir(exist_ok=True)
         for game, path in files.items():
             copyfile(path, shots / f"{game}.png")
