@@ -80,7 +80,7 @@ console.log('PASS application routing, rendering, hints, progression and local p
 
 const {readSave} = await import('../public/storage.js');
 values.delete('game-lab.v1');
-values.set('puzzle-lab.v1', JSON.stringify({
+values.set('game-lab.v1', JSON.stringify({
   version: 1,
   best: {'flood/1': 2, 'echo/2': 5, 'mirror/1': 2},
   sessions: {

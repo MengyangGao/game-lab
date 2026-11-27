@@ -5,8 +5,8 @@ from pathlib import Path
 
 from playwright.sync_api import expect, sync_playwright
 
-URL = os.environ.get("PUZZLE_LAB_URL", "http://127.0.0.1:8174/")
-SCREENSHOTS = os.environ.get("PUZZLE_LAB_SCREENSHOTS")
+URL = os.environ.get("GAME_LAB_URL", "http://127.0.0.1:8174/")
+SCREENSHOTS = os.environ.get("GAME_LAB_SCREENSHOTS")
 GAMES = ["mirror", "flood", "crate", "voxel", "mosaic", "echo", "relay", "circuit"]
 
 
@@ -26,9 +26,9 @@ def screenshots(page, name, target_element=None):
 
 
 with sync_playwright() as playwright:
-    browser_type = os.environ.get("PUZZLE_LAB_BROWSER", "chromium")
+    browser_type = os.environ.get("GAME_LAB_BROWSER", "chromium")
     browser_options = {}
-    if executable := os.environ.get("PUZZLE_LAB_BROWSER_EXECUTABLE"):
+    if executable := os.environ.get("GAME_LAB_BROWSER_EXECUTABLE"):
         browser_options["executable_path"] = executable
     browser = getattr(playwright, browser_type).launch(**browser_options)
     desktop = browser.new_context(viewport={"width": 1440, "height": 1000})

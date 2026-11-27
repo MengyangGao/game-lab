@@ -37,14 +37,14 @@ def main():
         raise SystemExit("README must contain exactly one screenshot gallery marker pair.")
 
     handler = partial(StaticHandler, directory=str(ROOT / "public"))
-    with tempfile.TemporaryDirectory(prefix="puzzle-lab-acceptance-") as scratch:
+    with tempfile.TemporaryDirectory(prefix="game-lab-acceptance-") as scratch:
         with ThreadingHTTPServer(("127.0.0.1", 0), handler) as server:
             thread = Thread(target=server.serve_forever, daemon=True)
             thread.start()
             try:
                 env = os.environ | {
-                    "PUZZLE_LAB_URL": f"http://127.0.0.1:{server.server_port}/",
-                    "PUZZLE_LAB_SCREENSHOTS": scratch,
+                    "GAME_LAB_URL": f"http://127.0.0.1:{server.server_port}/",
+                    "GAME_LAB_SCREENSHOTS": scratch,
                 }
                 subprocess.run([sys.executable, "tests/browser.py"], cwd=ROOT, env=env, check=True)
             finally:

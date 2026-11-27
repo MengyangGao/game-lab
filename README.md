@@ -1,6 +1,6 @@
 # Game Lab · 机关玩法合集
 
-**[在线开玩](https://gaomengyang.com/puzzle-lab/)**
+**[在线开玩](https://gaomengyang.com/game-lab/)**
 
 Game Lab 是非商业、非官方的游戏机关玩法研究项目，仅用于探索、学习与致敬。项目以原创程序、场景、界面和固定关卡呈现八种机制，每种玩法包含九道固定关卡、三档随机关卡、分级提示与浏览器本地进度。
 
@@ -79,7 +79,7 @@ python3 -m http.server 8174 --bind 127.0.0.1 --directory public
 - 提示分为玩法策略、标出位置、执行一步。最佳记录包含执行提示的动作。
 - 设置中可减少动态效果，或为溢彩画显示颜色辅助图案。
 
-首次在线加载成功后，静态资源会保存到浏览器。页脚出现「可离线游玩」后，可断网重新进入。安装入口由浏览器提供，需使用 localhost 或 HTTPS。进度保存在当前浏览器与站点地址下，旧版本进度会自动迁移。
+首次在线加载成功后，静态资源会保存到浏览器。页脚出现「可离线游玩」后，可断网重新进入。安装入口由浏览器提供，需使用 localhost 或 HTTPS。进度保存在当前浏览器与站点地址下。
 
 ## 验证与部署
 
@@ -97,7 +97,7 @@ python -m playwright install chromium
 python scripts/acceptance.py
 ```
 
-也可通过 `PUZZLE_LAB_BROWSER_EXECUTABLE` 指定本机 Chrome/Chromium 可执行文件。GitHub Actions 会运行引擎测试与 Chromium 端到端检查，检查通过的 `main` 版本会自动发布到 GitHub Pages，部署路径继续保持 `/puzzle-lab/`。
+也可通过 `GAME_LAB_BROWSER_EXECUTABLE` 指定本机 Chrome/Chromium 可执行文件。GitHub Actions 会运行引擎测试与 Chromium 端到端检查，检查通过的 `main` 版本会自动发布到 GitHub Pages，部署路径为 `/game-lab/`。
 
 - [玩法调研与规则取舍](docs/research.md)
 - [开发与状态接口](docs/development.md)
