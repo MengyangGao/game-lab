@@ -1,5 +1,7 @@
 # Puzzle Lab · 谜题实验室
 
+**[在线开玩](https://mengyanggao.github.io/puzzle-lab/)** · 用电脑、平板或手机的浏览器打开即可。
+
 Puzzle Lab 是一个纯静态、中文优先的原创休闲益智合集。七个小游戏，各有九道固定关卡和三个难度的随机模式。所有固定关卡随时可选。本地记录固定关卡最佳步数、各关进度和设置。
 
 | 游戏 | Puzzle Lab 玩法 | 参考来源 |
@@ -74,7 +76,7 @@ python -m playwright install chromium
 python scripts/acceptance.py
 ```
 
-直接把 `public/` 内容部署至任意 HTTPS 静态站点，支持子目录部署。应用没有运行时依赖、构建步骤或后端。GitHub Actions 工作流会运行引擎测试与 Chromium 端到端检查。
+直接把 `public/` 内容部署至任意 HTTPS 静态站点，支持子目录部署。应用没有运行时依赖、构建步骤或后端。GitHub Actions 工作流会运行引擎测试与 Chromium 端到端检查。推送到 `main` 且检查通过后，自动将 `public/` 部署到 GitHub Pages。
 
 - [玩法调研与取舍](docs/research.md)
 - [开发文档](docs/development.md)
