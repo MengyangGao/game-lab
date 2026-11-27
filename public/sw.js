@@ -1,5 +1,5 @@
 const prefix = `puzzle-lab:${self.registration.scope}:`;
-const cacheName = prefix + 'v2';
+const cacheName = prefix + 'v3';
 const files = [
   './', './index.html', './style.css', './app.js', './campaign.js', './views.js', './extra-views.js', './storage.js',
   './games/common.js', './games/mirror.js', './games/flood.js', './games/switch.js',

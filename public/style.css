@@ -164,3 +164,135 @@ dialog p{margin:10px 0;color:var(--muted)}
 .picture-tools{display:flex;gap:12px;align-items:center;justify-content:center}
 .picture-tools figure{width:64px;margin:0;text-align:center;font-size:.8rem;color:#5f3e67}
 .picture-tools svg{border-radius:6px}
+
+/* Material finishes share a frame while remaining distinct on each board. */
+.hero{
+  background:
+    radial-gradient(ellipse at 80% 17%,#b49bf32e,transparent 54%),
+    linear-gradient(112deg,#231c39 12%,#332651 68%,#463568);
+  border-color:#4f3d75;
+  color:#f9f4ff;
+}
+.hero h1 span{color:#dbbcff}
+.hero p{color:#e0d6ef}
+.hero .eyebrow{background:#f6e8ff14;color:#f1dbff;border-color:#f2d6ff42}
+.hero .primary{background:#e0c1ff;color:#2b1c44;border-color:#e0c1ff}
+.hero .primary:hover{background:#edd8ff}
+.hero-art::before{background-image:radial-gradient(#c7a4f3 1px,transparent 1px)}
+.orbit{border-color:#d9b5fd60}
+.art-spark{color:#e6c6ff}
+.art-tile{box-shadow:inset 0 0 0 1px #fff8,inset 0 -8px #28144d40,0 18px 34px #160d2b73}
+
+.board-area{position:relative;border:1px solid #30182e19;box-shadow:inset 0 1px 4px #21162516}
+.board-area>.board{box-shadow:0 7px 16px #25192835}
+.mirror .board-area,.mirror .card-preview{
+  background:
+    radial-gradient(ellipse at 50% 45%,#52627855,transparent 71%),
+    repeating-linear-gradient(135deg,#fff2 0 1px,transparent 1px 12px),
+    #1e2533;
+}
+.optical{background:#232b3a;border-color:#8797a8}
+.optical .cell{
+  background:linear-gradient(135deg,#394457,#283143);
+  box-shadow:inset 0 0 0 .5px #607089;
+  color:#f4c889;
+}
+.optical .wall{background:repeating-linear-gradient(-45deg,#151d2b 0 5px,#293142 5px 10px)}
+.optical .target{color:#f4ca83}
+.optical .sensor{color:#a6bbd8}
+.optical .lit{color:#ffe699;text-shadow:0 0 10px #ffb76c}
+.optical .mirror-cell:hover{background:#596a83}
+.mirror-piece{
+  background:linear-gradient(#f7ffff,#aec7d9 45%,#57728d 52%,#b0c3d4);
+  box-shadow:0 0 0 1px #dde8ee,0 3px 3px #101e2a;
+}
+.beam polyline{stroke:#ffdb88;stroke-width:.053}
+.beam circle{fill:#fff0ad}
+
+.flood .board-area,.flood .card-preview{
+  background:repeating-linear-gradient(0deg,#85420d09 0 1px,transparent 1px 5px),#f2dec3;
+}
+.pigment{background:#f8e9d4;border:1px solid #b49468}
+.pigment-color,.swatch{
+  background-image:radial-gradient(ellipse at 20% 10%,#fff8,transparent 66%),linear-gradient(155deg,transparent,#52242e32);
+  box-shadow:inset 0 1px #fff9,inset 0 -2px #52242e25;
+}
+.pigment .filled{box-shadow:inset 0 0 0 3px #fff7e6,inset 0 0 0 4px #71443675}
+
+.crate .card-preview,.crate .board-area{
+  background:
+    repeating-linear-gradient(45deg,#c3935919 0 2px,transparent 2px 12px),
+    radial-gradient(ellipse,#dcc397,#b59066);
+}
+.crate .walk-board{background:#6e5036;border:2px solid #765338}
+.crate .walk-board .cell{
+  background-color:#d8bb90;
+  background-image:linear-gradient(145deg,#fff3,#6a46201d);
+}
+.crate .walk-board .wall{
+  background:linear-gradient(160deg,#725039,#463329);
+  box-shadow:inset 0 1px #fcdeac50,inset 0 -3px #21180855;
+}
+.crate .walk-board .crate-piece{
+  color:#4f341e;
+  background:
+    linear-gradient(43deg,transparent 39%,#96724c 41% 54%,transparent 56%),
+    repeating-linear-gradient(90deg,#d19a51 0 9px,#b27a3c 9px 11px);
+  box-shadow:inset 0 0 0 2px #6d4a2f,inset 0 0 0 5px #e2b571;
+}
+.crate .walk-board .walker{background:#4e416d}
+.crate .walk-board .exit{background:#b7d1a8;color:#214a31}
+
+.voxel .card-preview,.voxel .board-area{
+  background:
+    linear-gradient(60deg,#c6a9d228,transparent 57%),
+    radial-gradient(ellipse,#f3e8f5,#e7dce9);
+}
+.isometric .occupied .top{fill:#bb9aed;stroke:#664884}
+.isometric .occupied .left{fill:#9774c8;stroke:#664884}
+.isometric .occupied .right{fill:#654c92;stroke:#664884}
+.voxel-cell.solid{background:linear-gradient(140deg,#b48fda,#6d4a9a);box-shadow:inset 1px 1px #ffef,inset -4px -4px #43245960}
+.voxel-cell:not(.solid){background:#f6edf7}
+
+.mosaic .card-preview,.mosaic .board-area{
+  background:
+    radial-gradient(ellipse at 48% 48%,#fff2,transparent 65%),
+    linear-gradient(130deg,#efd6e6,#dfb2cb);
+}
+.picture{
+  background:#8e5766;
+  border:2px solid #d4a388;
+  box-shadow:inset 0 0 0 2px #ffdac28c,0 7px 16px #5320443d;
+}
+.picture .cell{box-shadow:inset 0 0 0 1px #e9b2aa}
+.picture .cell::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  background:linear-gradient(145deg,#fff3,transparent 38%,#fff1 72%,#120a2733);
+  pointer-events:none;
+}
+
+.echo .card-preview,.echo .board-area{
+  background:radial-gradient(ellipse at 50% 38%,#e4d6aa,#baa375);
+}
+.echo .walk-board{background:#675534;border:2px solid #927c4c}
+.echo .walk-board .cell{
+  background:linear-gradient(150deg,#e2cc96,#b5a078);
+  box-shadow:inset 0 1px #fdecbd82,inset 0 -2px #4a36183b;
+}
+.echo .walk-board .wall{background:linear-gradient(150deg,#7a6a4e,#564831)}
+.echo .walk-board .walker{color:#513516;background:radial-gradient(circle at 30% 20%,#ffe9a9,#d39a47)}
+.echo .walk-board .echo-piece{background:#55547c;color:#f1e6f9}
+.echo .walk-board .plate{background:#7d6f97;color:#f9e3ff}
+.echo .walk-board .exit{background:#8a5e38;color:#fff2b8}
+.echo .timeline{color:#423411}
+
+.relay .card-preview,.relay .board-area{background:radial-gradient(ellipse,#cadfce,#a9c1b7)}
+.switches{border:2px solid #7c9d90}
+.switches .cell{background:linear-gradient(150deg,#386356,#214c41)}
+.switches .cell.on{
+  background:radial-gradient(ellipse at 45% 37%,#f0ffd6,#ace39b 75%);
+  box-shadow:inset 0 0 0 1px #deefc9,0 0 9px #b9f4af85;
+}
